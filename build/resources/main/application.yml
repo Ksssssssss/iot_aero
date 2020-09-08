@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: aero-ops
+
+  profiles:
+    active: pre

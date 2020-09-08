@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>添加用户</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/layui/css/layui.css"  media="all">
+    <script src="//g.alicdn.com/dingding/dinglogin/0.0.5/ddLogin.js"></script>
+</head>
+<body>
+
+<form class="layui-form" lay-filter="example" style="margin-top: 20px;">
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">真实姓名</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id ="realName" lay-verify="realName"  name="realName"/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">钉钉昵称</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id ="dingNickName" lay-verify="dingNickName"  name="dingNickName"/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">钉钉UID</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id ="dingTalkUid" name="dingTalkUid"/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">手机号</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id ="phoneNumber" name="phoneNumber" lay-verify="phoneNum"/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">用户角色</label>
+        <div class="layui-input-inline">
+            <select name="roleId" id = "roleIdSelect" lay-verify="required" lay-search="">
+                <option value="">直接选择/搜索选择</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">启用禁用</label>
+        <div class="layui-input-inline">
+            <input type="radio" name="enable" value=true title="启用">
+            <input type="radio" name="enable" value=false title="禁用">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-inline">
+            <input type="hidden" id ="id" lay-verify="id"  name="id"/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="edit">保存修改</button>
+        </div>
+    </div>
+</form>
+</fieldset>
+<script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+<script src="/layui/layui.js" charset="utf-8"></script>
+<script>
+    layui.use('form', function(){
+        var form = layui.form
+            ,layer = layui.layer;
+
+
+        //监听提交
+        form.on('submit(edit)', function(data){
+            var MASK = layer.load('正在处理数据,请稍候...', 0);
+            $.ajax({
+                url: "/user/edit",
+                type: 'POST',
+                data: JSON.stringify(data.field),
+                dataType: "json", // 响应的数据类型
+                contentType: "application/json",
+                success: function (data) {
+                    var result = data.data;
+                    var status = data.status;
+                    if(status.statusCode===200){
+                        layer.close(layer.index);
+                        window.parent.location.reload();
+                    }else{
+                        layer.close(MASK);
+                        layer.msg('操作失败:'+result.message, {icon: 5});
+                    }
+                },
+                error: function (data) {
+                    layer.close(MASK);
+                    layer.msg("修改用户失败,请检查");
+                }
+            });
+            return false;
+        });
+    });
+</script>
+
+</body>
+</html>

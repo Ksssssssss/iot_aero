@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>添加服务器</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/layui/css/layui.css"  media="all">
+    <script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="/common/js/common.js"></script>
+</head>
+<body>
+
+<form class="layui-form" action="" lay-filter="example" style="margin-top: 20px;">
+    <div class="layui-form-item">
+        <label class="layui-form-label">项目名称</label>
+        <div class="layui-input-inline">
+            <input type="text" name="projectName" lay-verify="title" autocomplete="off" placeholder="项目名称" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">版本控制</label>
+        <div class="layui-input-inline">
+            <select name="versionControl" id="versionControlSelect" lay-filter="versionControlSelect">
+                <option value="" selected>选择版本控制工具</option>
+                <option value="git">git</option>
+                <option value="svn">svn</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">编译工具</label>
+        <div class="layui-input-inline">
+            <select name="compiler" id="compilerSelect" lay-filter="compilerSelect">
+                <option value="" selected>选择编译工具</option>
+                <option value="gradle">gradle</option>
+                <option value="maven">maven</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">克隆方式</label>
+        <div class="layui-input-inline">
+            <select name="cloneType" id="cloneSelect" lay-filter="cloneSelect">
+                <option value="" selected>选择克隆方式</option>
+                <option value="https">https</option>
+                <option value="ssh">ssh</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">代码路径</label>
+        <div class="layui-input-inline">
+            <input type="text" name="url" lay-verify="required" placeholder="代码路径" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="codeLib">保存修改</button>
+        </div>
+    </div>
+</form>
+<script src="/layui/layui.js" charset="utf-8"></script>
+<script>
+    var codeLibId = getUrlParam("codeLibId");
+    layui.use(['tree', 'util','form'], function(){
+        var form = layui.form
+            ,tree = layui.tree
+            ,layer = layui.layer
+            ,util = layui.util;
+
+        //自定义验证规则
+        form.verify({
+            title: function(value){
+                if(value.length < 2){
+                    return '名称至少得2个字符啊';
+                }
+            },
+            content: function(value){
+                layedit.sync(editIndex);
+            },
+            ip: function(value, item){
+                function isValidIP(ip) {
+                    var reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/
+                    return reg.test(ip);
+                }
+                if(isValidIP(value) == false){
+                    return '请输入正确的IP地址';
+                }
+            }
+        });
+
+        //查询角色
+        $.ajax({
+            url:"/codeLib/getById",
+            dataType:"json",
+            contentType: "application/json",
+            async:false,
+            data:{"id": codeLibId},
+            type:"GET",
+            success:function(data){
+                var entity = data.data;
+                if(data.status.statusCode===200){
+                    form.val('example', {
+                        "projectName": entity.projectName
+                        ,"versionControl": entity.versionControl
+                        ,"compiler": entity.compiler
+                        ,"cloneType": entity.cloneType
+                        ,"url": entity.url
+                    });
+                }else{
+                    layer.msg('加载代码库失败:'+data.status.message, {icon: 5});
+                }
+                form.render();
+            },
+            error:function(data){
+                layer.msg(data);
+            }
+        });
+
+
+        //监听提交
+        form.on('submit(codeLib)', function(data){
+            var MASK = layer.load('正在处理数据,请稍候...', 0);
+            let field = data.field;
+            field.id = codeLibId;
+            $.ajax({
+                url: "/codeLib/edit",
+                type: 'POST',
+                data: JSON.stringify(field),
+                dataType: "json",
+                contentType: "application/json",
+                success: function (data) {
+                    var status = data.status;
+                    if(status.statusCode===200){
+                        layer.close(layer.index);
+                        window.parent.location.reload();
+                    }else{
+                        layer.close(MASK);
+                        layer.msg('操作失败:'+status.message, {icon: 5});
+                    }
+                },
+                error: function (data) {
+                    layer.close(MASK);
+                    layer.msg("修改代码库失败,请检查");
+                }
+            });
+            return false;
+        });
+
+    });
+
+</script>
+
+</body>
+</html>

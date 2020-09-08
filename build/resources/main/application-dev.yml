@@ -1,0 +1,91 @@
+server:
+  port: 9740
+
+
+spring:
+  mvc:
+    favicon:
+      enabled: true
+  datasource:
+    url: jdbc:sqlserver://192.168.1.29:1433;DatabaseName=HardwarePlatform
+    username: sa
+    password: cry.cap.fox-999
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    filters:  stat,wall,log4j
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+    initialSize:  2
+    minIdle: 1
+    maxActive: 4
+    maxWait: 60000
+  data:
+    mongodb:
+      uri: mongodb://192.168.1.153:27017/DevOps
+      devops:
+        uri: mongodb://192.168.1.153:27017/DevOps
+      hardware:
+        uri: mongodb://192.168.1.153:27017/HardwareData
+
+    elasticsearch:
+      clusterName: elasticsearch
+      clusterNodes: 192.168.1.154:9300 # 程序连接es的端口号是9300
+  kafka:
+    bootstrap-servers: 192.168.1.154:9092,192.168.1.152:9092,192.168.1.151:9092
+  jmx:
+    enabled: true
+
+#management:
+#  endpoint:
+#    jolokia:
+#      config:
+#        dev: true
+#      enabled: true
+#  endpoints:
+#    jmx:
+#      unique-names: true
+#    web:
+#      exposure:
+#        include: "*"
+#  server:
+#    port: 9740
+#    ssl:
+#      enabled: false
+
+#monitor:
+#  zk:
+#    cluster: 192.168.1.154:2181,192.168.1.152:2181,192.168.1.151:2181
+#  kafka:
+#    cluster: 192.168.1.154:9092,192.168.1.152:9092,192.168.1.151:9092
+#  redis:
+#    cluster: 192.168.1.151:6379,192.168.1.152:6379,192.168.1.153:6379
+#  elasticsearch:
+#    cluster: 192.168.1.154:9200
+#  mongodb:
+#    cluster: 192.168.1.151:27017,192.168.1.153:27017
+
+monitor:
+  warning:
+    spec:
+      cpu: 0.95
+      memory: 0.95
+      kafka-lag: 10000
+    script:
+      path: D:\soft\scripts\dingRobotWarning.bat
+
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.bchd.ops.entity.po
+
+app:
+  start:
+    timeOut: 120000
+
+
+dingtalk:
+  appid: dingoa07iqeed43vmofobw
+  appSecret: jHhCdHxbFSTMXeW1iaB18yAITCFfLS6d29ebKnF3xTD-8fC7oa-ZZN0Wee0ybNwf
+  baseUrl: http://127.0.0.1:9740/login.html
+  encodeBaseUrl: http%3A%2F%2F127.0.0.1%3A9740%2Flogin.html
+
+logging:
+  config: classpath:log4j2-cluster.xml

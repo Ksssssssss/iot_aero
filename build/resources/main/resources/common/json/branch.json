@@ -1,0 +1,27 @@
+{
+  "code": 0,
+  "msg": "",
+  "count": 5,
+  "data": [
+    {
+      "id": 1,
+      "branch": "dev",
+      "desc": "开发分支"
+    },
+    {
+      "id": 2,
+      "branch": "test",
+      "desc": "测试分支"
+    },
+    {
+      "id": 3,
+      "branch": "pre",
+      "desc": "预发布分支"
+    },
+    {
+      "id": 4,
+      "branch": "master",
+      "desc": "正式环境"
+    }
+  ]
+}

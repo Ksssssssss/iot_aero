@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aero.ops.entity.dao.CommonMapper">
+
+    <resultMap id="BaseTable" type="com.aero.ops.entity.po.BaseTablePO">
+        <result column="TABLE_CATALOG" jdbcType="VARCHAR" property="tableCatalog" />
+        <result column="TABLE_SCHEMA" jdbcType="VARCHAR" property="tableSchema" />
+        <result column="TABLE_NAME" jdbcType="VARCHAR" property="tableName" />
+        <result column="TABLE_TYPE" jdbcType="VARCHAR" property="tableType" />
+    </resultMap>
+
+    <select id="checkTableExistsWithSchema"
+            resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM information_schema.tables WHERE
+        table_schema=#{tableSchema} AND table_name = #{tableName}
+    </select>
+
+    <select id="checkTableExistsWithShow"
+            resultType="java.util.Map">
+        show tables like #{tableName}
+    </select>
+
+    <select id="showTables"
+            resultMap="BaseTable">
+        SELECT
+        *
+        FROM
+        INFORMATION_SCHEMA.TABLES
+    </select>
+
+    <select id="getTables" resultMap="BaseTable" parameterType="java.lang.String">
+        SELECT
+        *
+        FROM
+        ${schemaTable}
+        WHERE
+        [TABLE_CATALOG] = #{database,jdbcType=VARCHAR}
+        ORDER BY
+        [TABLE_NAME]
+    </select>
+
+
+    <select id="showDatabases" resultType="string">
+        SELECT
+        Name
+        FROM
+        Master..SysDatabases
+        WHERE
+        dbid > 4
+        ORDER BY
+        Name
+    </select>
+
+    <select id="getColumns" resultType="string" parameterType="java.lang.String">
+        SELECT
+        [COLUMN_NAME]
+        FROM
+        ${database}.information_schema.COLUMNS
+        WHERE
+        [TABLE_CATALOG] = #{database,jdbcType=VARCHAR}
+        AND
+        [TABLE_NAME] = #{table,jdbcType=VARCHAR}
+    </select>
+</mapper>

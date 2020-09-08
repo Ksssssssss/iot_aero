@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>登录--AeroIOT运维系统</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="icon" href="/aero.ico">
+    <link rel="stylesheet" href="/layui/css/layui.css" media="all"/>
+    <link rel="stylesheet" href="/common/css/login.css" media="all"/>
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <script type="text/javascript" src="/common/js/common.js"></script>
+    <script src="//g.alicdn.com/dingding/dinglogin/0.0.5/ddLogin.js"></script>
+    <style>
+        #dingLogin{
+            border-radius: 4px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin: -150px 0 0 -150px;
+            z-index: 99;
+        }
+    </style>
+</head>
+<body>
+<!--<video class="video-player" preload="auto" autoplay="autoplay" loop="loop" data-height="1080" data-width="1920" height="1080"-->
+<!--       width="1920">-->
+<!--    <source src="common/video/login.mp4" type="video/mp4">-->
+<!--</video>-->
+<img src="/common/images/login-bg.jpg" height="1080" width="1920">
+<div class="video_mask"></div>
+<div class="login" id="pwdLogin" style="display: none">
+    <h1>Aero-IOT Ops System</h1>
+    <form class="layui-form layui-form-pane" style="padding-left: 52px; height: 260px; width: 260px;">
+        <div class="layui-form-item">
+            <input class="layui-input" name="username" placeholder="用户名" lay-verify="required" type="text" autocomplete="off">
+        </div>
+        <div class="layui-form-item">
+            <input class="layui-input" name="password" placeholder="密码" lay-verify="required" type="password" autocomplete="off">
+        </div>
+        <div class="layui-form-item form_code">
+            <input class="layui-input" name="captcha" placeholder="验证码" lay-verify="required" type="text" autocomplete="off">
+            <div class="code"><img src="/common/images/code.jpg" id="captchaImg" width="116" height="36"></div>
+        </div>
+        <!--lay-submit="" lay-filter="login"-->
+        <button type="submit" lay-submit lay-filter="login" class="layui-btn login_btn">登录</button>
+        <div class="layui-row" style="margin-top: 15px;">
+            <a href="javascript:" class="signUp">
+                <span>申请运维权限</span>
+            </a>
+            <!-- color:#296088;-->
+            <a href="javascript:changeToDingLogin()" style="float:right;color:#509eff;">
+                <span>钉钉登录</span>
+            </a>
+        </div>
+    </form>
+</div>
+
+<div id="dingLogin">
+    <div id="login_container"></div>
+    <div class="layui-row" style="text-align:center;">
+        <a href="javascript:changeToPwdLogin()">
+            <span style="color:#509eff;font-size:14px">密码登录</span>
+        </a>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    var $;
+    var layer;
+    var form;
+
+    var appid;
+    var baseURL;
+    var enc_baseURL;
+    var obj;
+
+   var hanndleMessage = function (event) {
+        var origin = event.origin;
+        console.log("origin", event.origin);
+        if (origin === "https://login.dingtalk.com") { //判断是否来自ddLogin扫码事件。
+            var loginTmpCode = event.data; //拿到loginTmpCode后就可以在这里构造跳转链接进行跳转了
+            console.log("loginTmpCode", loginTmpCode);
+            window.location.href = "https://oapi.dingtalk.com/connect/oauth2/sns_authorize?appid=" + appid + "&response_type=code&scope=snsapi_login&state=STATE&redirect_uri=" + baseURL + "&loginTmpCode=" + loginTmpCode;
+        }
+    };
+
+    if(typeof window.addEventListener != 'undefined') {
+        window.addEventListener('message', hanndleMessage, false);
+    } else if (typeof window.attachEvent != 'undefined') {
+        window.attachEvent('onmessage', hanndleMessage);
+    }
+
+    layui.use(['jquery', 'layer','element', 'form'],function() {
+        $ = layui.$;
+        layer = layui.layer;
+        form = layui.form;
+
+        $(function () {
+            $.ajax({
+                url: "/user/getDingTalkConfig",
+                type: "GET",
+                dataType: "JSON",
+                success: function (data, textStatus) {
+                    if (data.status.statusCode === 200) {
+                        var result = data.data;
+                        appid = result.appid;
+                        baseURL = result.baseUrl;
+                        enc_baseURL = result.encodeBaseUrl;
+                        obj = DDLogin({
+                            id: "login_container",//这里需要你在自己的页面定义一个HTML标签并设置id，例如<div id="login_container"></div>或<span id="login_container"></span>
+                            goto: encodeURIComponent('https://oapi.dingtalk.com/connect/oauth2/sns_authorize?appid=' + appid + '&response_type=code&scope=snsapi_login&state=STATE&redirect_uri=' + baseURL),
+                            style: "border:none;background-color:rgba(0,0,0,0.5);",
+                            width: "365",
+                            height: "300"
+                        });
+                    }
+                }
+            });
+
+
+            var url = window.location.search;
+            if (url != null && url != "") {
+                var code = getUrlParam('code');
+                if (code != null && code !== "") {
+                    idconfirm();
+                }
+            }else{
+                refreshCaptchaImg();
+            }
+
+            function idconfirm() {
+                var MASK = layer.load();
+                var ding = {"code": code};
+                $.ajax({
+                    url: "/user/loginWithDing",
+                    data: JSON.stringify(ding),
+                    type: "post",
+                    dataType: "JSON",
+                    contentType: "application/json",
+                    success: function (data, textStatus) {
+                        if (data.status.statusCode === 200) {
+                            setCookie("user", data.data.realName, 4);
+                            window.location.href = "/index.html";
+                        }else {
+                            layer.msg(data.status.message);
+                        }
+                    },
+                    error:function(data){
+                        console.log("钉钉扫描出错:"+JSON.stringify(data));
+                    },
+                    complete:function(){
+                        layer.close(MASK);
+                    }
+                });
+            }
+        });
+
+        $("#captchaImg").click(function () {
+            refreshCaptchaImg();
+        })
+
+        form.on('submit(login)', function(data){
+            var loginData = JSON.stringify(data.field);
+            console.log(loginData);
+            $.ajax({
+                type: "POST",
+                data: loginData,
+                url: "/user/loginByPwd",
+                dataType: "json",
+                contentType: "application/json",
+                async: true,
+                success: function (result) {
+                    console.log(result);
+                    if(result.status.statusCode === 200){
+                        setCookie("user", result.data.realName, 4);
+                        window.location.href = "index.html";
+                    }else {
+                        refreshCaptchaImg();
+                        layer.msg(result.status.message);
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log("状态:"+ xhr.status + ", error:" + errorThrown);
+                }
+            })
+            //防止页面跳转
+            return false;
+        });
+    });
+
+    function changeToPwdLogin() {
+        refreshCaptchaImg();
+        $("#pwdLogin").show();
+        $("#dingLogin").hide();
+    }
+
+    function changeToDingLogin() {
+        $("#dingLogin").show();
+        $("#pwdLogin").hide();
+    }
+
+    function refreshCaptchaImg() {
+        $("#captchaImg")[0].src = "/user/getCaptchaImg";
+    }
+</script>
+</body>
+</html>

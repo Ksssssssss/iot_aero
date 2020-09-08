@@ -1,0 +1,25 @@
+{
+  "code": 0,
+  "msg": "",
+  "count": 5,
+  "data": [
+    {
+      "id": 1,
+      "serverName": "DESKTOP-JIHTJ3Q",
+      "os": "win 10",
+      "wlanIp": "192.168.1.45",
+      "lanIp": "192.168.1.45",
+      "codeBasePath": "F:\\code\\java\\work\\deploy-code",
+      "deployBasePath": "F:\\code\\java\\work\\deploy-target"
+    },
+    {
+      "id": 2,
+      "serverName": "DESKTOP-JIHTJ3P",
+      "os": "win 10",
+      "wlanIp": "192.168.1.35",
+      "lanIp": "192.168.1.35",
+      "codeBasePath": "F:\\code\\java\\work\\deploy-code",
+      "deployBasePath": "F:\\code\\java\\work\\deploy-target"
+    }
+  ]
+}

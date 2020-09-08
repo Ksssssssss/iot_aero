@@ -1,0 +1,59 @@
+server:
+  port: 9740
+
+spring:
+  mvc:
+    favicon:
+      enabled: true
+  datasource:
+    url: jdbc:sqlserver://101.201.73.98:1433;DatabaseName=HardwarePlatform
+    username: sa
+    password: cry.cap.fox-999
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    filters:  stat,wall,log4j
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+    initialSize:  2
+    minIdle: 1
+    maxActive: 4
+    maxWait: 60000
+  data:
+    mongodb:
+      uri: mongodb://root:crycapfox-999@dds-2ze7435b510c69c41.mongodb.rds.aliyuncs.com:3717,dds-2ze7435b510c69c42.mongodb.rds.aliyuncs.com:3717/admin?replicaSet=mgset-12939431&readPreference=secondaryPreferred
+      devops:
+        uri: mongodb://root:crycapfox-999@dds-2ze7435b510c69c41.mongodb.rds.aliyuncs.com:3717,dds-2ze7435b510c69c42.mongodb.rds.aliyuncs.com:3717/DevOps?replicaSet=mgset-12939431&readPreference=secondaryPreferred
+      hardware:
+        uri: mongodb://root:crycapfox-999@dds-2ze7435b510c69c41.mongodb.rds.aliyuncs.com:3717,dds-2ze7435b510c69c42.mongodb.rds.aliyuncs.com:3717/HardwareData?replicaSet=mgset-12939431&readPreference=secondaryPreferred
+
+    elasticsearch:
+      clusterName: elasticsearch
+      clusterNodes: localhost:9300 # 程序连接es的端口号是9300
+  kafka:
+#    bootstrap-servers: 192.168.1.154:9092,192.168.1.152:9092,192.168.1.151:9092
+    bootstrap-servers: 172.17.176.145:9092,172.17.176.144:9092,172.17.176.139:9092
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.bchd.ops.entity.po
+
+app:
+  start:
+    timeOut: 120000
+
+monitor:
+  warning:
+    spec:
+      cpu: 0.8
+      memory: 0.8
+      kafka-lag: 10000
+    script:
+      path: D:\soft\scripts\dingRobotWarning.bat
+
+
+dingtalk:
+  appid: dingoat5vvueanmczys4hn
+  appSecret: rI1U_3gbn6dSr0BvZo2Fds5ru6Z4NA027zM2G-8u8GrCmC33HyOgQWJ2GkhnK2S1
+  baseUrl: http://devops.aeroiot.cn/login.html
+  encodeBaseUrl: http%3A%2F%2Fdevops.aeroiot.cn%2Flogin.html
+
+logging:
+  config: classpath:log4j2-proc.xml

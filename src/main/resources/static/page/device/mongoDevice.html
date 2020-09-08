@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<title>设备列表</title>
+	<link rel="stylesheet" href="/layui/css/layui.css" media="all"/>
+	<script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+	<script type="text/javascript" src="/layui/layui.js"></script>
+	<style>
+		body{
+			margin: 10px;
+		}
+		.demo-carousel{
+			height: 200px;
+			line-height: 200px;
+			text-align: center;
+		}
+	 </style>
+</head>
+<body>
+<form class="layui-form" id="searchForm" action="">
+	<div class="layui-form-item">
+		<div class="layui-inline">
+			<label class="layui-form-label">设备号</label>
+			<div class="layui-input-inline">
+				<input type="text" name="mac" id="mac" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-inline">
+			<label class="layui-form-label">设备名称</label>
+			<div class="layui-input-inline">
+				<input type="text" name="sensorName" id="sensorName" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-inline">
+			<label class="layui-form-label">在线状态</label>
+			<div class="layui-input-block">
+				<select name="status" id="status" lay-filter="status">
+					<option value="0" selected="selected">全部</option>
+					<option value="1">在线</option>
+					<option value="2">离线</option>
+				</select>
+			</div>
+		</div>
+		<div class="layui-inline">
+			<label class="layui-form-label">设备类型</label>
+			<div class="layui-input-block">
+				<select name="sensorType" id="sensorType" lay-filter="sensorType">
+				</select>
+			</div>
+		</div>
+		<div class="layui-inline">
+			<!--把页面的< button>标签替换为< input type=‘button’ />标签可避免form参数被重置-->
+			<input type='button' class="layui-btn search-btn" id="btnSearch" value="查询"/>
+		</div>
+	</div>
+</form>
+<table class="layui-hide" id="device-list" lay-filter="coredata"></table>
+<script type="text/javascript">
+	layui.use(['laydate', 'laypage', 'layer', 'table', 'form', 'jquery', 'element'], function(){
+		var laydate = layui.laydate //日期
+		,laypage = layui.laypage //分页
+		,layer = layui.layer //弹层
+		,table = layui.table //表格
+		,form = layui.form //轮播
+		,$ = layui.jquery
+		,element = layui.element //元素操作
+
+		$(function () {
+			$.ajax({
+				url: '/device/sensorTypes',
+				method: 'GET',
+				// data: params,
+				async: false,
+				dataType: "json",
+				success: function (data, htmlData) {
+					var sensorTypeSelect = $("#sensorType");
+					sensorTypeSelect.empty();
+					sensorTypeSelect.append(new Option("请选择"));
+					$.each(data.data, function (index, item) {
+						sensorTypeSelect.append(new Option(item.desc,item.code));
+					});
+					form.render("select");
+				},
+				error: function (data) {
+					layer.msg("传感器类型数据加载失败");
+				}
+			});
+		});
+
+	  //执行一个 table 实例
+	  table.render({
+		elem: '#device-list'
+		,method: 'POST'	//请求方法，默认为 GET
+		,url: '/mongoDevice/query' //数据接口
+		,contentType: 'application/json'
+		,where : {
+			 mac: $("#mac").val(),
+			 sensorName: $("#sensorName").val(),
+			 status: $("#status").val(),
+			 sensorType: $("#sensorType").val()
+		  }
+		,request:{
+			  pageName:'pageIndex',
+			  limitName: 'pageSize'
+		  }
+		,title: '设备表'
+		,page: true //开启分页
+		,limit: 10 //每页默认展示多少条数据, 默认是10条
+		,defaultToolbar: ['filter','exports']
+		,toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+		,totalRow: false //开启合计行
+		,cols: [[ //表头
+		  {type: 'checkbox', fixed: 'left'}
+		  ,{field: '_id', title: 'ID', width:80, sort: true, fixed: 'left'}
+		  ,{field: 'uuid', title: 'UUID', width:200}
+		  ,{field: 'mac', title: '设备号', width:200}
+		  ,{field: 'sensorName', title: '设备名称', width:200}
+		  ,{field: 'status', title: '状态', width: 90, sort: true}
+		  ,{field: 'sensorType', title: '类型', width:80, sort: true}
+		  ,{field: 'secondchecktime', title: '离线时间', width: 90, sort: true}
+		  ,{field: 'timeRecently', title: '最后消息时间', width: 200, sort: true}
+		  ,{field: 'startvalue', title: '初始值', width:200}
+		  ,{field: 'funcs', title: '能力值', width: 100}
+		 ]]
+		 ,id: 'tableLoad'
+	  });
+
+	  //监听头工具栏事件
+	  table.on('toolbar(coredata)', function(obj){
+		var checkStatus = table.checkStatus(obj.config.id)
+		,data = checkStatus.data; //获取选中的数据
+		switch(obj.event){
+		  case 'add':
+			layer.msg('添加');
+		  break;
+		  case 'update':
+			if(data.length === 0){
+			  layer.msg('请选择一行');
+			} else if(data.length > 1){
+			  layer.msg('只能同时编辑一个');
+			} else {
+				ADDDIV = layer.open({
+					type: 2,
+					maxmin: false,
+					shift: 4,
+					shadeClose: true,
+					title: checkStatus.data[0].sensorName,
+					shade: [0.8, "#ccc"],
+					offset: 'auto',
+					area: ['630px', '500px'],
+					content: "mongoDeviceEdit.html",
+					success: function(layero, index) {
+						var record = checkStatus.data[0];
+						// var startValJson = record.startvalue;
+						// var starts = JSON.parse(startValJson);
+						// var startVal;
+						// $.each(starts,function(index, item) {
+						//   if (item.Param==="R0") {
+						// 	  startVal=item.Value;
+						//   }
+						// });
+						var srcFuncs = record.funcs;
+						var funcs = srcFuncs;
+						if(srcFuncs == "" || srcFuncs == null || srcFuncs == undefined){
+
+						}else {
+							if (srcFuncs.indexOf("$values")>-1) {
+								var srcFuncObj = JSON.parse(srcFuncs);
+								funcs = srcFuncObj.$values;
+							}
+						}
+						var body = layer.getChildFrame('body', index);
+						body.contents().find("#id").val(record._id);
+						body.contents().find("#sensorName").val(record.sensorName);
+						body.contents().find("#secondCheckTime").val(record.secondchecktime);
+						body.contents().find("#startValue").val(record.startvalue);
+						body.contents().find("#serialNum").val(record.serialnum);
+						var funcSelect = body.contents().find("#funcsSelect");
+						$.ajax({
+							url: '/funcs/all',
+							method: 'GET',
+							async: false,
+							dataType: "json",
+							success: function (data, htmlData) {
+								// var funcsSelect = $("#funcsSelect");
+								funcSelect.empty();
+								funcSelect.append(new Option("请选择能力"));
+								$.each(data.data, function (index, item) {
+									if (funcs.indexOf(item.code)!==-1) {
+										//new Option("文本","值",true,true).后面两个true分别表示默认被选中和有效!
+										funcSelect.append(new Option(item.desc, item.code, true, true));
+									}else {
+										funcSelect.append(new Option(item.desc, item.code));
+									}
+								});
+								var iframeWin = layero.find('iframe')[0].contentWindow;
+								// 重新渲染子窗口select
+								iframeWin.layui.form.render('select');
+							},
+							error: function (data) {
+								layer.msg("项目数据加载失败");
+							}
+						});
+					}
+				});
+			}
+			  break;
+			case 'delete':
+				if(data.length === 0){
+					layer.msg('请选择一行');
+				} else {
+					layer.msg('暂不支持删除操作');
+				}
+				break;
+		};
+	  });
+
+
+	  //分页
+	  laypage.render({
+		elem: 'pageDemo' //分页容器的id
+		,count: 100 //总页数
+		,skin: '#1E9FFF' //自定义选中色值
+		//,skip: true //开启跳页
+		,jump: function(obj, first){
+		  if(!first){
+			layer.msg('第'+ obj.curr +'页', {offset: 'b'});
+		  }
+		}
+	  });
+
+		$('#btnSearch').click(function () {
+			table.reload('tableLoad', {
+				where : {
+					mac: $("#mac").val(),
+					sensorName: $("#sensorName").val(),
+					status: $("#status").val(),
+					sensorType: $("#sensorType").val()
+				},
+				// request:{
+				// 	pageName:'pageIndex',
+				// 	limitName: 'pageSize'
+				// }
+			});
+		});
+	});
+</script>
+</body>
+</html>

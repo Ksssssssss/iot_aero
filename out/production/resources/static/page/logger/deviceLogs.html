@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>app logs</title>
+    <link href="/favicon.ico" rel="icon" type="image/x-icon" />
+    <link rel="stylesheet" href="/layui/css/layui.css" media="all"/>
+    <link rel="stylesheet" href="/layui/layui-font-extend/iconfont.css" media="all"/>
+    <script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <style>
+        body{
+            margin: 10px;
+        }
+        .demo-carousel{
+            height: 200px;
+            line-height: 200px;
+            text-align: center;
+        }
+        /*layui-table 表格内容允许换行*/
+        .layui-table-cell{
+            height: auto;
+            overflow:visible;
+            text-overflow:inherit;
+            white-space:normal;
+        }
+        .layui-layer-tips{
+            word-break: break-all;
+        }
+        .layui-layer-open{
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+<form class="layui-form" id="searchForm" action="">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">传感器类型</label>
+            <div class="layui-input-block">
+                <select name="sensorType" id="sensorType" lay-filter="sensorType">
+                    <option value="" selected="selected">请选择</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">数据方向</label>
+            <div class="layui-input-block">
+                <select name="direction" id="direction" lay-filter="direction">
+                    <option value="" selected="selected">请选择</option>
+                    <option value="UP_STREAM">上行</option>
+                    <option value="DOWN_STREAM">下行</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">设备号</label>
+            <div class="layui-input-inline">
+                <input type="text" name="deviceId" id="deviceId" placeholder="device ID" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">时间范围</label>
+            <div class="layui-input-inline">
+                <input type="text" name="timeRange" id="timeRange" lay-verify="date" placeholder="start - end" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <!--把页面的< button>标签替换为< input type=‘button’ />标签可避免form参数被重置-->
+            <input type="button" class="layui-btn search-btn" id="btnSearch" value="Search" readonly>
+        </div>
+    </div>
+</form>
+<table class="layui-hide" id="device-logs" lay-filter="coredata"></table>
+<script type="text/html" id="customToolbar">
+    <a class="layui-btn layui-btn-xs" lay-event="asc">时间顺序
+        <i class="iconfont icon-jiantou-up"></i>
+    </a>
+    <a class="layui-btn layui-btn-xs" lay-event="desc">时间逆序
+        <i class="iconfont icon-jiantou-down"></i>
+    </a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="reset">重置
+        <i class="layui-icon layui-icon-refresh"></i>
+    </a>
+</script>
+<script type="text/html" id="ContentDetailTpl">
+    {{#
+    var strHtml= function(str) {
+            return str.replace(/<[^>].*?>/g, '').replace(/;/g,'<br>');
+        }
+    }}
+    <a href="javascript:;" data-d="{{strHtml(d.content)}}" onclick="show_tip(this)">
+        {{# if(d.content.length>100){ }}
+        {{d.content.substr(0,100)}}...
+        {{# } else { }}
+        {{d.content}}
+        {{# } }}
+    </a>
+</script>
+
+<script type="text/javascript">
+    //显示详情
+    function show_tip(t) {
+        var row = $(t).attr('data-d'); //获取显示内容
+        var tip = layer.open( {
+            type: 0,
+            title: "设备完整日志",
+            area: '300px',
+            content: row,
+            btn: ['复制并关闭'],
+            yes:function (index,layero) {
+                copyToClipboard(row);
+                layer.close(tip);
+            }
+        })
+    }
+
+    function copyToClipboard(s){
+        if(window.clipboardData){
+            window.clipboardData.setData('text',s);
+        }else{
+            (function(s){
+                document.oncopy=function(e){
+                    e.clipboardData.setData('text',s);
+                    e.preventDefault();
+                    document.oncopy=null;
+                }
+            })(s);
+            document.execCommand('Copy');
+        }
+    }
+
+    layui.use(['laydate', 'laypage', 'layer', 'table', 'form'], function(){
+        var laydate = layui.laydate //日期
+            ,laypage = layui.laypage //分页
+            ,layer = layui.layer //弹层
+            ,table = layui.table //表格
+            ,form = layui.form //表单
+
+        //日期时间选择器
+        laydate.render({
+            elem: '#timeRange'
+            ,type: 'datetime'
+            ,range: ' to '
+            ,format: 'yyyy-MM-dd HH:mm:ss'
+        });
+
+
+        $.ajax({
+            url: '/device/sensorTypes',
+            method: 'GET',
+            async: false,
+            dataType: "json",
+            success: function (data,htmlData) {
+                if (data.status.statusCode===200) {
+                    var sensorSelect = $("#sensorType");
+                    sensorSelect.empty();
+                    sensorSelect.append(new Option("请选择",""));
+                    $.each(data.data, function (index, item) {
+                        sensorSelect.append(new Option(item.desc, item.code));
+                    });
+                    form.render("select");
+                }
+            },
+            error: function (data) {
+                layer.msg("服务器数据加载失败");
+            }
+        });
+
+
+
+        //执行一个 table 实例
+        table.render({
+            elem: '#device-logs'
+            ,method: 'POST'	//请求方法，默认为 GET
+            ,url: '/deviceLog/getLogs' //数据接口
+            ,contentType: 'application/json'
+            ,where : {
+                sensorType: $("#sensorType").val(),
+                direction: $("#direction").val(),
+                macPrefix: $("#deviceId").val(),
+                startTime: $("#timeRange").val().split("  to  ")[0],
+                endTime: $("#timeRange").val().split("  to  ")[1]
+            }
+            ,request:{
+                pageName:'pageIndex',
+                limitName: 'pageSize'
+            }
+            ,title: '设备日志表'
+            ,page: true //开启分页
+            ,limit: 10 //每页默认展示多少条数据, 默认是10条
+            ,defaultToolbar: ['filter','exports']
+            ,toolbar: '#customToolbar' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+            ,totalRow: false //开启合计行
+            ,cols: [[ //表头
+                {field: 'msgTime', title: '时间', width: 200, sort: true},
+                {field: 'serverIp', title: '服务器', width: 100},
+                {field: 'sensorType', title: '类型', width: 80},
+                {field: 'deviceId', title: '设备号', width: 200},
+                {field: 'direction', title: '方向', width: 80, templet: function (data) {
+                        return data.direction==="UP_STREAM"?"上行":"下行";
+                    }},
+                {field: 'content', title: '日志内容', width: 800, templet: '#ContentDetailTpl'}
+            ]]
+            ,id: 'loggerLoad'
+        });
+
+        //监听头工具栏事件
+        table.on('toolbar(coredata)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id)
+                ,data = checkStatus.data; //获取选中的数据
+            var option = {
+                sensorType: $("#sensorType").val(),
+                direction: $("#direction").val(),
+                macPrefix: $("#deviceId").val(),
+                startTime: $("#timeRange").val().split("  to  ")[0],
+                endTime: $("#timeRange").val().split("  to  ")[1]
+            };
+            switch(obj.event){
+                case 'asc':
+                    option.timeSort = "asc";
+                    break;
+                case 'desc':
+                    option.timeSort = "desc";
+                    break;
+                case 'desc':
+                    $('#searchForm')[0].reset();
+                    form.render();
+                    break;
+            };
+            table.reload('loggerLoad', {
+                where : option
+            });
+        });
+
+        //分页
+        laypage.render({
+            elem: 'pageDemo' //分页容器的id
+            ,count: 100 //总页数
+            ,skin: '#1E9FFF' //自定义选中色值
+            //,skip: true //开启跳页
+            ,jump: function(obj, first){
+                if(!first){
+                    layer.msg('第'+ obj.curr +'页', {offset: 'b'});
+                }
+            }
+        });
+
+        $('#btnSearch').click(function () {
+            table.reload('loggerLoad', {
+                where : {
+                    sensorType: $("#sensorType").val(),
+                    direction: $("#direction").val(),
+                    macPrefix: $("#deviceId").val(),
+                    startTime: $("#timeRange").val().split("  to  ")[0],
+                    endTime: $("#timeRange").val().split("  to  ")[1]
+                }
+            });
+        });
+
+    });
+</script>
+</body>
+</html>

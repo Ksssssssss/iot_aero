@@ -1,0 +1,1290 @@
+[{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b18e"
+  },
+  "title": "设备管理",
+  "icon": "&#xe670;",
+  "href": "",
+  "spread": true,
+  "menuType": 1,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.605Z"
+  },
+  "updTime": {
+    "$date": "2020-08-05T07:39:07.605Z"
+  }
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b18f"
+  },
+  "title": "设备列表（S）",
+  "icon": "&#xe678;",
+  "href": "/page/device/device.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.736Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:06:37.305Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b18e"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b190"
+  },
+  "title": "设备列表（M）",
+  "icon": "&#xe678;",
+  "href": "/page/device/mongoDevice.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.736Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:06:42.343Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b18e"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b191"
+  },
+  "title": "设备调试",
+  "icon": "&#xe631;",
+  "href": "/page/device/debug.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.736Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:06:57.293Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b18e"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b192"
+  },
+  "title": "数据库工具",
+  "icon": "&#xe62c;",
+  "href": "",
+  "spread": false,
+  "menuType": 1,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.742Z"
+  },
+  "updTime": {
+    "$date": "2020-08-05T07:39:07.742Z"
+  }
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b193"
+  },
+  "title": "SqlServer",
+  "icon": "&#xe62d;",
+  "href": "/page/database/msserver.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.744Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:07:03.911Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b192"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b194"
+  },
+  "title": "MongoDB",
+  "icon": "&#xe62e;",
+  "href": "/page/database/mongo.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.744Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:07:13.376Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b192"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b195"
+  },
+  "title": "日志管理",
+  "icon": "&#xe629;",
+  "href": "",
+  "spread": false,
+  "menuType": 1,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.746Z"
+  },
+  "updTime": {
+    "$date": "2020-08-05T07:39:07.746Z"
+  }
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b196"
+  },
+  "title": ".NET项目日志",
+  "icon": "&#xe655;",
+  "href": "/page/logger/dotNetLogs.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.747Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:07:25.159Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b195"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b197"
+  },
+  "title": "应用日志",
+  "icon": "&#xe655;",
+  "href": "/page/logger/appLogs.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.747Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:07:32.567Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b195"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b198"
+  },
+  "title": "设备日志",
+  "icon": "&#xe638;",
+  "href": "/page/logger/deviceLogs.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.747Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:07:48.360Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b195"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b199"
+  },
+  "title": "性能监控",
+  "icon": "&#xe665;",
+  "href": "",
+  "spread": false,
+  "menuType": 1,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.749Z"
+  },
+  "updTime": {
+    "$date": "2020-08-05T07:39:07.749Z"
+  }
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b19a"
+  },
+  "title": "服务器参数",
+  "icon": "&#xe716;",
+  "href": "/page/monitor/server.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.751Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:08:04.038Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b199"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b19b"
+  },
+  "title": "微服务参数",
+  "icon": "&#xe653;",
+  "href": "/page/monitor/app.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.751Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:08:12.519Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b199"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b19c"
+  },
+  "title": "项目部署",
+  "icon": "&#xe7ae;",
+  "href": "",
+  "spread": false,
+  "menuType": 1,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.752Z"
+  },
+  "updTime": {
+    "$date": "2020-08-05T07:39:07.752Z"
+  }
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b19d"
+  },
+  "title": "代码库",
+  "icon": "&#xe735;",
+  "href": "/page/deploy/codelib.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.754Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:08:27.828Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19c"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b19e"
+  },
+  "title": "流水线",
+  "icon": "&#xe64c;",
+  "href": "/page/deploy/pipeline.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.754Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:08:37.672Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19c"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b19f"
+  },
+  "title": "服务器管理",
+  "icon": "&#xe67f;",
+  "href": "/page/deploy/server.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.754Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:08:49.182Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19c"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b1a0"
+  },
+  "title": "权限管理",
+  "icon": "&#xe770;",
+  "href": "",
+  "spread": false,
+  "menuType": 1,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.755Z"
+  },
+  "updTime": {
+    "$date": "2020-08-05T07:39:07.755Z"
+  }
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b1a1"
+  },
+  "title": "用户管理",
+  "icon": "&#xe612;",
+  "href": "/page/ucenter/user.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.757Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:08:56.255Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a0"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b1a2"
+  },
+  "title": "角色管理",
+  "icon": "&#xe662;",
+  "href": "/page/ucenter/role.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.757Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:09:03.162Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a0"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b1a3"
+  },
+  "title": "菜单管理",
+  "icon": "&#xe705;",
+  "href": "/page/ucenter/menu.html",
+  "spread": false,
+  "menuType": 2,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.757Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:09:11.296Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a0"
+},{
+  "_id": {
+    "$oid": "5f2a621b87a65d68d494b1a4"
+  },
+  "title": "菜单添加页",
+  "icon": "",
+  "href": "/page/ucenter/menuAdd.html",
+  "spread": false,
+  "menuType": 3,
+  "crtTime": {
+    "$date": "2020-08-05T07:39:07.757Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:09:28.294Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a3"
+},{
+  "_id": {
+    "$oid": "5f2a6cb78dd4013a9be46199"
+  },
+  "title": "角色修改页",
+  "icon": "",
+  "href": "/page/ucenter/roleEdit.html",
+  "spread": false,
+  "menuType": 3,
+  "crtTime": {
+    "$date": "2020-08-05T08:24:23.014Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:09:39.277Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a2"
+},{
+  "_id": {
+    "$oid": "5f2a6d418dd4013a9be4619a"
+  },
+  "title": "设备信息修改页（SQL SERVER）",
+  "icon": "",
+  "href": "/page/device/deviceEdit.html",
+  "spread": false,
+  "menuType": 3,
+  "crtTime": {
+    "$date": "2020-08-05T08:26:41.229Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:09:47.711Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b18f"
+},{
+  "_id": {
+    "$oid": "5f2a6d708dd4013a9be4619b"
+  },
+  "title": "设备信息修改页（MongoDB）",
+  "icon": "",
+  "href": "/page/device/mongoDeviceEdit.html",
+  "spread": false,
+  "menuType": 3,
+  "crtTime": {
+    "$date": "2020-08-05T08:27:28.730Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:10:00.672Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b190"
+},{
+  "_id": {
+    "$oid": "5f2a73f53583741c8aee2362"
+  },
+  "title": "菜单修改页",
+  "icon": "",
+  "href": "/page/ucenter/menuEdit.html",
+  "spread": false,
+  "menuType": 3,
+  "crtTime": {
+    "$date": "2020-08-05T08:55:17.517Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:10:08.648Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a3"
+},{
+  "_id": {
+    "$oid": "5f2a78c87a4fb5362e0beccb"
+  },
+  "title": "用户修改页",
+  "icon": "",
+  "href": "/page/ucenter/userEdit.html",
+  "spread": false,
+  "menuType": 3,
+  "crtTime": {
+    "$date": "2020-08-05T09:15:52.814Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:10:15.999Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a1"
+},{
+  "_id": {
+    "$oid": "5f2a84b4e90515747a297147"
+  },
+  "title": "代码库添加页",
+  "icon": "",
+  "href": "/page/deploy/codeAdd.html",
+  "spread": false,
+  "menuType": 3,
+  "crtTime": {
+    "$date": "2020-08-05T10:06:44.255Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:10:24.422Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19d"
+},{
+  "_id": {
+    "$oid": "5f2a84dce90515747a297148"
+  },
+  "title": "服务器添加页",
+  "icon": "",
+  "href": "/page/deploy/serverAdd.html",
+  "spread": false,
+  "menuType": 3,
+  "crtTime": {
+    "$date": "2020-08-05T10:07:24.687Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:10:32.094Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19f"
+},{
+  "_id": {
+    "$oid": "5f2a8ca0c308f95e72957f9b"
+  },
+  "title": "代码库修改页",
+  "icon": "",
+  "href": "/page/deploy/codeEdit.html",
+  "spread": false,
+  "menuType": 3,
+  "crtTime": {
+    "$date": "2020-08-05T10:40:32.569Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:17:33.461Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19d"
+},{
+  "_id": {
+    "$oid": "5f2a995fc91b90451d4944e9"
+  },
+  "title": "首页",
+  "icon": "",
+  "href": "/index.html",
+  "spread": false,
+  "menuType": 4,
+  "crtTime": {
+    "$date": "2020-08-05T11:34:55.066Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T01:32:01.067Z"
+  }
+},{
+  "_id": {
+    "$oid": "5f2a9b24f85467633f6c9d9b"
+  },
+  "title": "菜单展示接口",
+  "icon": "",
+  "href": "/menu/getNavMenu",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-05T11:42:28.201Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:18:01.580Z"
+  },
+  "parentId": "5f2a995fc91b90451d4944e9"
+},{
+  "_id": {
+    "$oid": "5f2b60cbc56716714bb20d05"
+  },
+  "title": "菜单列表接口",
+  "icon": "",
+  "href": "/menu/list",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T01:45:47.078Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:17:23.193Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a3"
+},{
+  "_id": {
+    "$oid": "5f2b6120c56716714bb20d06"
+  },
+  "title": "菜单添加接口",
+  "icon": "",
+  "href": "/menu/save",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T01:47:12.416Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:17:14.525Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a3"
+},{
+  "_id": {
+    "$oid": "5f2b614dc56716714bb20d07"
+  },
+  "title": "菜单修改接口",
+  "icon": "",
+  "href": "/menu/edit",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T01:47:57.508Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:18:21.289Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a3"
+},{
+  "_id": {
+    "$oid": "5f2b6172c56716714bb20d08"
+  },
+  "title": "菜单删除接口",
+  "icon": "",
+  "href": "/menu/delete",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T01:48:34.102Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:18:31.994Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a3"
+},{
+  "_id": {
+    "$oid": "5f2b61b3c56716714bb20d09"
+  },
+  "title": "菜单类型接口",
+  "icon": "",
+  "href": "/menu/allTypes",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T01:49:39.550Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:18:39.500Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a3"
+},{
+  "_id": {
+    "$oid": "5f2b61cfc56716714bb20d0a"
+  },
+  "title": "菜单父类接口",
+  "icon": "",
+  "href": "/menu/allParent",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T01:50:07.541Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:18:47.413Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a3"
+},{
+  "_id": {
+    "$oid": "5f2b62ecf68f7220d78ae1c9"
+  },
+  "title": "菜单详情接口",
+  "icon": "",
+  "href": "/menu/getById",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T01:54:52.098Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:18:55.093Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a3"
+},{
+  "_id": {
+    "$oid": "5f2b6365f68f7220d78ae1ca"
+  },
+  "title": "角色列表接口",
+  "icon": "",
+  "href": "/role/query",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T01:56:53.050Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:19:06.900Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a2"
+},{
+  "_id": {
+    "$oid": "5f2b639bf68f7220d78ae1cb"
+  },
+  "title": "角色查询接口",
+  "icon": "",
+  "href": "/role/getById",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T01:57:47.737Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:19:19.348Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a2"
+},{
+  "_id": {
+    "$oid": "5f2b63eef68f7220d78ae1cc"
+  },
+  "title": "用户登出接口",
+  "icon": "",
+  "href": "/user/logout",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T01:59:10.078Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:19:47.838Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a2"
+},{
+  "_id": {
+    "$oid": "5f2b64fcf68f7220d78ae1cd"
+  },
+  "title": "菜单树形接口",
+  "icon": "",
+  "href": "/menu/allMenuTree",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T02:03:40.504Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:19:37.238Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a2"
+},{
+  "_id": {
+    "$oid": "5f2b695d658b4642ef8d044e"
+  },
+  "title": "角色修改接口",
+  "icon": "",
+  "href": "/role/edit",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T02:22:19.069Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:19:28.614Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a2"
+},{
+  "_id": {
+    "$oid": "5f2b6a2e658b4642ef8d044f"
+  },
+  "title": "角色删除接口",
+  "icon": "",
+  "href": "/role/delete",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T02:25:50.034Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:16:56.891Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a2"
+},{
+  "_id": {
+    "$oid": "5f2b6aef658b4642ef8d0450"
+  },
+  "title": "角色添加页",
+  "icon": "",
+  "href": "/page/ucenter/roleAdd.html",
+  "spread": false,
+  "menuType": 3,
+  "crtTime": {
+    "$date": "2020-08-06T02:29:03.163Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:16:47.709Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a2"
+},{
+  "_id": {
+    "$oid": "5f2b6c4981a5510a03bc5471"
+  },
+  "title": "用户添加页",
+  "icon": "",
+  "href": "/page/ucenter/userAdd.html",
+  "spread": false,
+  "menuType": 3,
+  "crtTime": {
+    "$date": "2020-08-06T02:34:49.635Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:16:39.950Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a1"
+},{
+  "_id": {
+    "$oid": "5f2b6fb881a5510a03bc5472"
+  },
+  "title": "用户列表接口",
+  "icon": "",
+  "href": "/user/query",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T02:49:28.111Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:16:29.510Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a1"
+},{
+  "_id": {
+    "$oid": "5f2b7053bef0174b12601d18"
+  },
+  "title": "用户添加接口",
+  "icon": "",
+  "href": "/user/save",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T02:52:03.193Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:16:21.611Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a1"
+},{
+  "_id": {
+    "$oid": "5f2b70abbef0174b12601d19"
+  },
+  "title": "用户修改接口",
+  "icon": "",
+  "href": "/user/edit",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T02:53:31.412Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:16:12.979Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a1"
+},{
+  "_id": {
+    "$oid": "5f2b70d9bef0174b12601d1a"
+  },
+  "title": "用户详情接口",
+  "icon": "",
+  "href": "/user/getById",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T02:54:17.819Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:16:04.461Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a1"
+},{
+  "_id": {
+    "$oid": "5f2b70f7bef0174b12601d1b"
+  },
+  "title": "用户删除接口",
+  "icon": "",
+  "href": "/user/delete",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T02:54:47.277Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:15:55.518Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a1"
+},{
+  "_id": {
+    "$oid": "5f2b72d4bef0174b12601d1c"
+  },
+  "title": "用户日志页",
+  "icon": "",
+  "href": "/page/ucenter/userLog.html",
+  "spread": false,
+  "menuType": 3,
+  "crtTime": {
+    "$date": "2020-08-06T03:02:44.545Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:15:47.627Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b1a1"
+},{
+  "_id": {
+    "$oid": "5f2b735bbef0174b12601d1d"
+  },
+  "title": "Mongo库列表接口",
+  "icon": "",
+  "href": "/mongoDatabase/mongoDatabases",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:04:59.845Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:15:37.799Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b194"
+},{
+  "_id": {
+    "$oid": "5f2b7379bef0174b12601d1e"
+  },
+  "title": "Mongo表列表接口",
+  "icon": "",
+  "href": "/mongoDatabase/mongoCollections",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:05:29.551Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:15:25.332Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b194"
+},{
+  "_id": {
+    "$oid": "5f2b73dbbef0174b12601d1f"
+  },
+  "title": "Mongo表头接口",
+  "icon": "",
+  "href": "/mongoDatabase/mongoCols",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:07:07.474Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:15:17.944Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b194"
+},{
+  "_id": {
+    "$oid": "5f2b73f9bef0174b12601d20"
+  },
+  "title": "Mongo查询接口",
+  "icon": "",
+  "href": "/mongoDatabase/mongoQuery",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:07:37.048Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:15:10.993Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b194"
+},{
+  "_id": {
+    "$oid": "5f2b76e54e258c1f4dab00b0"
+  },
+  "title": "设备列表接口",
+  "icon": "",
+  "href": "/device/query",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:20:05.460Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:15:02.376Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b18f"
+},{
+  "_id": {
+    "$oid": "5f2b77094e258c1f4dab00b1"
+  },
+  "title": "传感器类型接口",
+  "icon": "",
+  "href": "/device/sensorTypes",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:20:41.988Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:14:52.310Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b18f"
+},{
+  "_id": {
+    "$oid": "5f2b776f4e258c1f4dab00b2"
+  },
+  "title": "能力值接口",
+  "icon": "",
+  "href": "/funcs/all",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:22:23.069Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:14:42.006Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b18f"
+},{
+  "_id": {
+    "$oid": "5f2b77c64e258c1f4dab00b3"
+  },
+  "title": "设备信息修改接口",
+  "icon": "",
+  "href": "/device/edit",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:23:50.837Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:14:35.108Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b18f"
+},{
+  "_id": {
+    "$oid": "5f2b78074e258c1f4dab00b4"
+  },
+  "title": "设备列表接口（Mongo）",
+  "icon": "",
+  "href": "/mongoDevice/query",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:24:55.758Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:14:25.223Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b190"
+},{
+  "_id": {
+    "$oid": "5f2b78384e258c1f4dab00b5"
+  },
+  "title": "设备信息修改接口（Mongo）",
+  "icon": "",
+  "href": "/mongoDevice/edit",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:25:44.646Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:14:10.594Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b190"
+},{
+  "_id": {
+    "$oid": "5f2b79354e258c1f4dab00b6"
+  },
+  "title": "日志应用列表接口",
+  "icon": "",
+  "href": "/logger/apps",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:29:57.756Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:14:00.710Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b197"
+},{
+  "_id": {
+    "$oid": "5f2b79594e258c1f4dab00b7"
+  },
+  "title": "应用日志列表接口",
+  "icon": "",
+  "href": "/logger/getLogs",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:30:33.789Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:13:46.118Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b197"
+},{
+  "_id": {
+    "$oid": "5f2b7e54b0f15977800cbbcb"
+  },
+  "title": "设备日志列表接口",
+  "icon": "",
+  "href": "/deviceLog/getLogs",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:51:48.303Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:13:28.624Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b198"
+},{
+  "_id": {
+    "$oid": "5f2b7edcb0f15977800cbbcc"
+  },
+  "title": "服务器性能参数监控接口",
+  "icon": "",
+  "href": "/monitor/serverList",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:54:03.998Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:13:15.289Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19a"
+},{
+  "_id": {
+    "$oid": "5f2b7f24b0f15977800cbbcd"
+  },
+  "title": "代码库列表接口",
+  "icon": "",
+  "href": "/codeLib/list",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:55:16.358Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:12:43.779Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19d"
+},{
+  "_id": {
+    "$oid": "5f2b7f4bb0f15977800cbbce"
+  },
+  "title": "代码库新增接口",
+  "icon": "",
+  "href": "/codeLib/save",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:55:55.334Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:12:35.365Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19d"
+},{
+  "_id": {
+    "$oid": "5f2b7f64b0f15977800cbbcf"
+  },
+  "title": "代码库修改接口",
+  "icon": "",
+  "href": "/codeLib/edit",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:56:20.929Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:12:25.823Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19d"
+},{
+  "_id": {
+    "$oid": "5f2b7f80b0f15977800cbbd0"
+  },
+  "title": "代码库删除接口",
+  "icon": "",
+  "href": "/codeLib/delete",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:56:48.014Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:12:15.814Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19d"
+},{
+  "_id": {
+    "$oid": "5f2b7f98b0f15977800cbbd1"
+  },
+  "title": "代码库查询接口",
+  "icon": "",
+  "href": "/codeLib/getById",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:57:12.063Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:12:01.222Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19d"
+},{
+  "_id": {
+    "$oid": "5f2b7fd3b0f15977800cbbd2"
+  },
+  "title": "代码库全部列表接口",
+  "icon": "",
+  "href": "/codeLib/all",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:58:11.005Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:11:48.121Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19e"
+},{
+  "_id": {
+    "$oid": "5f2b8022b0f15977800cbbd3"
+  },
+  "title": "服务器全部列表接口",
+  "icon": "",
+  "href": "/server/all",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T03:59:30.232Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:11:36.277Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19e"
+},{
+  "_id": {
+    "$oid": "5f2b8045b0f15977800cbbd4"
+  },
+  "title": "服务器分页列表接口",
+  "icon": "",
+  "href": "/server/list",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T04:00:05.239Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:11:21.091Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19f"
+},{
+  "_id": {
+    "$oid": "5f2b80bbb0f15977800cbbd5"
+  },
+  "title": "服务器修改页",
+  "icon": "",
+  "href": "/page/deploy/serverEdit.html",
+  "spread": false,
+  "menuType": 3,
+  "crtTime": {
+    "$date": "2020-08-06T04:02:03.707Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:11:14.055Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19f"
+},{
+  "_id": {
+    "$oid": "5f2b80e1b0f15977800cbbd6"
+  },
+  "title": "服务器详情接口",
+  "icon": "",
+  "href": "/server/getById",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T04:02:41.490Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:11:06.627Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19f"
+},{
+  "_id": {
+    "$oid": "5f2b80feb0f15977800cbbd7"
+  },
+  "title": "服务器修改接口",
+  "icon": "",
+  "href": "/server/edit",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T04:03:10.898Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:10:56.687Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19f"
+},{
+  "_id": {
+    "$oid": "5f2b8118b0f15977800cbbd8"
+  },
+  "title": "服务器删除接口",
+  "icon": "",
+  "href": "/server/delete",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T04:03:36.187Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:10:49.577Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19f"
+},{
+  "_id": {
+    "$oid": "5f2b815cb0f15977800cbbd9"
+  },
+  "title": "服务器新增接口",
+  "icon": "",
+  "href": "/server/save",
+  "spread": false,
+  "menuType": 5,
+  "crtTime": {
+    "$date": "2020-08-06T04:04:44.149Z"
+  },
+  "updTime": {
+    "$date": "2020-08-06T08:10:40.227Z"
+  },
+  "parentId": "5f2a621b87a65d68d494b19f"
+}]

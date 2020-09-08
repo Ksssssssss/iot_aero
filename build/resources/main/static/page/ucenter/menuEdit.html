@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>添加用户</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/layui/css/layui.css"  media="all">
+    <script type="text/javascript" src="/common/js/common.js"></script>
+</head>
+<body>
+
+<form class="layui-form" action="" lay-filter="example" style="margin-top: 20px;">
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">菜单名称</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id ="title" lay-verify="title"  name="title"/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">URL</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id ="href" lay-verify="href"  name="href"/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">菜单图标</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id ="icon" lay-verify="icon"  name="icon"/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否展开</label>
+        <div class="layui-input-inline">
+            <input type="radio" name="spread" value=true title="展开">
+            <input type="radio" name="spread" value=false title="关闭" checked="">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">菜单类型</label>
+        <div class="layui-input-inline">
+            <select name="menuType" id = "menuTypeSelect" lay-verify="menuType" >
+                <option value="">请选择</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">父菜单</label>
+        <div class="layui-input-inline">
+            <select name="parentId" id = "parentIdSelect" lay-search="">
+                <option value="">请选择</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">提交</button>
+        </div>
+    </div>
+</form>
+</fieldset>
+<script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+<script src="/layui/layui.js" charset="utf-8"></script>
+<script>
+    var menuId = getUrlParam('menuId');
+    layui.use('form', function() {
+        var form = layui.form
+            , layer = layui.layer;
+
+        $.ajax({
+            url: "/menu/allParent",
+            dataType: "json",
+            contentType: "application/json",
+            async: false,
+            type: "GET",//请求方式,
+            success: function (data) {
+                var sel = $('#parentIdSelect');
+                $.each(data.data, function (index, element) {
+                    sel.append(new Option(element.title, element.id));
+                });
+                form.render('select'); //刷新select选择框渲染
+            },
+            error: function (data) {
+                layer.msg(data);
+            }
+        });
+
+        $.ajax({
+            url: "/menu/allTypes",
+            dataType: "json",
+            contentType: "application/json",
+            async: false,
+            type: "GET",
+            success: function (data) {
+                var sel = $('#menuTypeSelect');
+                $.each(data.data, function (index, element) {
+                    sel.append(new Option(element.desc, element.type));
+                });
+                form.render('select'); //刷新select选择框渲染
+            },
+            error: function (data) {
+                layer.msg(data);
+            }
+        });
+
+        //查询角色
+        $.ajax({
+            url:"/menu/getById",
+            dataType:"json",
+            contentType: "application/json",
+            async:false,
+            data:{"id": menuId},
+            type:"GET",
+            success:function(data){
+                var entity = data.data;
+                if(data.status.statusCode===200){
+                    form.val('example', {
+                        "id": entity.id
+                        ,"title": entity.title
+                        ,"href": entity.href
+                        ,"icon": entity.icon
+                        ,"parentId": entity.parentId
+                        ,"menuType": entity.menuType
+                    });
+                    entity.spread?$("input:radio[value=true]").attr("checked","checked"):$("input:radio[value=false]").attr("checked","checked");
+                }else{
+                    layer.msg('加载角色详情失败:'+data.status.message, {icon: 5});
+                }
+                form.render();
+            },
+            error:function(data){
+                layer.msg(data);
+            }
+        });
+
+
+        //监听提交
+        form.on('submit(demo1)', function (data) {
+            data.field.id = menuId;
+            var MASK = layer.load('正在处理数据,请稍候...', 0);
+            $.ajax({
+                url: "/menu/edit",
+                type: 'POST',
+                data: JSON.stringify(data.field),
+                dataType: "json", // 响应的数据类型
+                contentType: "application/json",
+                success: function (data) {
+                    if (data.status.statusCode === 200) {
+                        layer.close(layer.index);
+                        window.parent.location.reload();
+                    } else {
+                        layer.close(MASK);
+                        layer.msg('操作失败:' + data.status.message, {icon: 5});
+                    }
+                },
+                error: function (data) {
+                    layer.close(MASK);
+                    layer.msg("添加用户失败,请检查");
+                }
+            });
+            return false;
+        });
+    })
+</script>
+
+</body>
+</html>

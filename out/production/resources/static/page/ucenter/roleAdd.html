@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>添加用户</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/layui/css/layui.css"  media="all">
+    <script type="text/javascript" src="/common/js/common.js"></script>
+</head>
+<body>
+
+<form class="layui-form" lay-filter="example" style="margin-top: 20px;">
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">角色名称</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id ="roleName" lay-verify="roleName"  name="roleName"/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">备注</label>
+        <div class="layui-input-block">
+            <input type="text" class="layui-input" id ="remark" name="remark" lay-verify="remark"/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">启用禁用</label>
+        <div class="layui-input-inline">
+            <input type="radio" name="enable" value=true title="启用">
+            <input type="radio" name="enable" value=false title="禁用">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">访问权限</label>
+        <div class="layui-input-block">
+            <div class="layui-btn-container" style="display: none;">
+                <button type="button" class="layui-btn layui-btn-sm" lay-demo="getChecked">获取选中节点数据</button>
+                <button type="button" class="layui-btn layui-btn-sm" lay-demo="setChecked">勾选指定节点</button>
+                <button type="button" class="layui-btn layui-btn-sm" lay-demo="reload">重载实例</button>
+            </div>
+            <div id="menuTree" class="demo-tree-more"></div>
+        </div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <div class="layui-input-inline">
+            <input type="hidden" id ="id" lay-verify="id"  name="id"/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="edit">保存</button>
+        </div>
+    </div>
+</form>
+</fieldset>
+<script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+<script src="/layui/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['tree','util','form','layer'], function(){
+        var form = layui.form
+            ,tree = layui.tree
+            ,layer = layui.layer
+            ,util = layui.util;
+
+        $.ajax({
+            url:"/menu/getNavMenu",
+            dataType:"json",
+            async:false,
+            type:"GET",
+            success:function(data){
+                // menuTree = data;
+                tree.render({
+                    elem: '#menuTree'
+                    ,data: data
+                    ,showCheckbox: true //是否显示复选框
+                    ,id: 'demoId1'
+                    ,isJump: true //是否允许点击节点时弹出新窗口跳转
+                    ,click: function(obj){
+                        var data = obj.data; //获取当前点击的节点数据
+                        layer.msg('状态：'+ obj.state + '<br>节点数据：' + JSON.stringify(data));
+                    }
+                });
+            },
+            error:function(data){
+                layer.msg(data);
+            }
+        });
+
+        //按钮事件
+        util.event('lay-demo', {
+            getChecked: function(othis){
+                var checkedData = tree.getChecked('demoId1'); //获取选中节点的数据
+                layer.alert(JSON.stringify(checkedData), {shade:0});
+                console.log(checkedData);
+            }
+            ,setChecked: function(){
+                tree.setChecked('demoId1', [3, 5]); //勾选指定节点
+            }
+            ,reload: function(){
+                //重载实例
+                tree.reload('demoId1', {
+                });
+            }
+        });
+
+
+        //监听提交
+        form.on('submit(edit)', function(data){
+            var MASK = layer.load('正在处理数据,请稍候...', 0);
+            var checkData = tree.getChecked('demoId1');
+            var privileges = [];
+            for(var i in checkData) {
+                privileges.push(checkData[i].id); //第一级
+                for(var j in checkData[i].children) {
+                    privileges.push(checkData[i].children[j].id); //第二级
+                    if(checkData[i].children[j].children!==undefined){
+                        for(var k in checkData[i].children[j].children) {
+                            privileges.push(checkData[i].children[j].children[k].id); //保存最后子节点id
+                        }
+                    }
+                }
+            }
+            let field = data.field;
+            $.ajax({
+                url: "/role/save",
+                type: 'POST',
+                data: JSON.stringify({
+                    "roleName": field.roleName,
+                    "enable": field.enable,
+                    "remark":field.remark,
+                    "menuList": privileges,
+                }),
+                dataType: "json", // 响应的数据类型
+                contentType: "application/json",
+                success: function (data) {
+                    var result = data.data;
+                    var status = data.status;
+                    if(status.statusCode===200){
+                        layer.close(layer.index);
+                        window.parent.location.reload();
+                    }else{
+                        layer.close(MASK);
+                        layer.msg('操作失败:'+result.message, {icon: 5});
+                    }
+                },
+                error: function (data) {
+                    layer.close(MASK);
+                    layer.msg("新增角色失败,请检查");
+                }
+            });
+            return false;
+        });
+    });
+</script>
+
+</body>
+</html>

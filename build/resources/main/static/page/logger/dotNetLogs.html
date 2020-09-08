@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>app logs</title>
+        <link href="favicon.ico" rel="icon" type="image/x-icon" />
+        <link rel="stylesheet" href="/layui/css/layui.css" media="all"/>
+        <link rel="stylesheet" href="/layui/layui-font-extend/iconfont.css" media="all"/>
+        <script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+        <script type="text/javascript" src="/layui/layui.js"></script>
+        <style>
+            body{
+                margin: 10px;
+            }
+            .demo-carousel{
+                height: 200px;
+                line-height: 200px;
+                text-align: center;
+            }
+            /*layui-table 表格内容允许换行*/
+            .layui-table-cell{
+                height: auto;
+                overflow:visible;
+                text-overflow:inherit;
+                white-space:normal;
+            }
+        </style>
+    </head>
+    <body>
+        <form class="layui-form" id="searchForm" action="">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">应用名称</label>
+                    <div class="layui-input-block">
+                        <select name="app" id="app" lay-filter="app">
+                            <option value="*" selected="selected">ALL</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">服务器</label>
+                    <div class="layui-input-block">
+                        <select name="server" id="server" lay-filter="server">
+                            <option value="*" selected="selected">ALL</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">日志级别</label>
+                    <div class="layui-input-block">
+                        <select name="level" id="level" lay-filter="level">
+                            <option value="INFO" selected="selected">INFO</option>
+                            <option value="TRACE">TRACE</option>
+                            <option value="DEBUG">DEBUG</option>
+                            <option value="WARN">WARN</option>
+                            <option value="ERROR">ERROR</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">类名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="className" id="className" placeholder="class name" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">关键字</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="keyword" id="keyword" lay-verify="required" placeholder="keyword" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">时间范围</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="timeRange" id="timeRange" lay-verify="date" placeholder="start - end" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item layui-row">
+                <div class="layui-input-block layui-col-md10" style="margin-left: 40px">
+                    <input type="text" name="kql" id="kql" placeholder="KQL Search" autocomplete="off" class="layui-input">
+                </div>
+
+                <div class="layui-input-block layui-col-md1" style="margin-left: 0px" >
+                    <!--把页面的< button>标签替换为< input type=‘button’ />标签可避免form参数被重置-->
+                    <input type="button" class="layui-btn search-btn" id="btnSearch" value="Search" readonly style="padding:0 40px;">
+                </div>
+            </div>
+        </form>
+        <table class="layui-hide" id="device-list" lay-filter="coredata"></table>
+        <script type="text/html" id="customToolbar">
+            <a class="layui-btn layui-btn-xs" lay-event="asc">时间顺序
+                <i class="iconfont icon-jiantou-up"></i>
+            </a>
+            <a class="layui-btn layui-btn-xs" lay-event="desc">时间逆序
+                <i class="iconfont icon-jiantou-down"></i>
+            </a>
+            <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="reset">重置
+                <i class="layui-icon layui-icon-refresh"></i>
+            </a>
+        </script>
+        <script type="text/javascript">
+            layui.use(['laydate', 'laypage', 'layer', 'table', 'form'], function(){
+                var laydate = layui.laydate //日期
+                    ,laypage = layui.laypage //分页
+                    ,layer = layui.layer //弹层
+                    ,table = layui.table //表格
+                    ,form = layui.form //表单
+
+                //日期时间选择器
+                laydate.render({
+                    elem: '#timeRange'
+                    ,type: 'datetime'
+                    ,range: ' to '
+                    ,format: 'yyyy-MM-dd HH:mm:ss'
+                });
+
+
+                $.ajax({
+                    url: '/logger/apps',
+                    method: 'GET',
+                    async: false,
+                    dataType: "json",
+                    success: function (data,htmlData) {
+                        if (data.status.statusCode===200) {
+                            $("#app").empty();
+                            $("#app").append(new Option("ALL", "*"));
+                            $.each(data.data, function (index, item) {
+                                $("#app").append(new Option(item, item));
+                            });
+                            form.render("select");
+                        }
+                    },
+                    error: function (data) {
+                        layer.msg("服务器数据加载失败");
+                    }
+                });
+
+
+
+                //执行一个 table 实例
+                table.render({
+                    elem: '#device-list'
+                    ,method: 'POST'	//请求方法，默认为 GET
+                    ,url: '/logger/getLogs' //数据接口
+                    ,contentType: 'application/json'
+                    ,where : {
+                        appName: $("#app").val(),
+                        logLevel: $("#level").val(),
+                        className: $("#className").val(),
+                        keyword: $("#keyword").val(),
+                        startTime: $("#timeRange").val().split("  to  ")[0],
+                        endTime: $("#timeRange").val().split("  to  ")[1],
+                        kql : $("#kql").val()
+                    }
+                    ,request:{
+                        pageName:'pageIndex',
+                        limitName: 'pageSize'
+                    }
+                    ,title: '日志表'
+                    ,page: true //开启分页
+                    ,limit: 10 //每页默认展示多少条数据, 默认是10条
+                    ,defaultToolbar: ['filter','exports']
+                    ,toolbar: '#customToolbar' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+                    ,totalRow: false //开启合计行
+                    ,cols: [[ //表头
+                        {field: 'timestamp', title: '时间', sort: true, hide: true},
+                        {field: 'serverIp', title: '服务器', hide: true},
+                        {field: 'level', title: '日志级别', hide: true},
+                        {field: 'classname', title: '类名', hide: true},
+                        {field: 'thread', title: '线程', hide: true},
+                        {field: 'content', title: '日志内容', hide: true},
+                        {field: 'msg', title: '综合内容', width:'100%', sort: true}
+                    ]]
+                    ,id: 'loggerLoad'
+                });
+
+                $('th').hide();
+
+                //监听头工具栏事件
+                table.on('toolbar(coredata)', function(obj){
+                    var checkStatus = table.checkStatus(obj.config.id)
+                        ,data = checkStatus.data; //获取选中的数据
+                    var option = {
+                        appName: $("#app").val(),
+                        logLevel: $("#level").val(),
+                        className: $("#className").val(),
+                        keyword: $("#keyword").val(),
+                        startTime: $("#timeRange").val().split("  to  ")[0],
+                        endTime: $("#timeRange").val().split("  to  ")[1],
+                        kql : $("#kql").val()
+                    };
+                    switch(obj.event){
+                        case 'asc':
+                            option.timeSort = "asc";
+                            break;
+                        case 'desc':
+                            option.timeSort = "desc";
+                            break;
+                        case 'desc':
+                            $('#searchForm')[0].reset();
+                            form.render();
+                            break;
+                    };
+                    table.reload('loggerLoad', {
+                        where : option
+                    });
+                    $('th').hide();
+                });
+
+                //分页
+                laypage.render({
+                    elem: 'pageDemo' //分页容器的id
+                    ,count: 100 //总页数
+                    ,skin: '#1E9FFF' //自定义选中色值
+                    //,skip: true //开启跳页
+                    ,jump: function(obj, first){
+                        if(!first){
+                            layer.msg('第'+ obj.curr +'页', {offset: 'b'});
+                        }
+                    }
+                });
+
+                $('#btnSearch').click(function () {
+                    table.reload('loggerLoad', {
+                        where : {
+                            appName: $("#app").val(),
+                            logLevel: $("#level").val(),
+                            className: $("#className").val(),
+                            keyword: $("#keyword").val(),
+                            startTime: $("#timeRange").val().split("  to  ")[0],
+                            endTime: $("#timeRange").val().split("  to  ")[1],
+                            kql : $("#kql").val()
+                        }
+                    });
+                    $('th').hide();
+                });
+
+            });
+        </script>
+    </body>
+</html>

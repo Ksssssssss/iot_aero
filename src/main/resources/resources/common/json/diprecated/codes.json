@@ -1,0 +1,56 @@
+{
+  "code": 0,
+  "msg": "",
+  "count": 5,
+  "data": [
+    {
+      "id": 1,
+      "projectName": "aero-parent",
+      "versionControl": "git",
+      "compiler": "gradle",
+      "url": "git@codeup.aliyun.com:5f02b00162b03dd98afb1b5a/aero-iot/aero-parent.git"
+    },
+    {
+      "id": 2,
+      "projectName": "aero-virtual-device",
+      "versionControl": "git",
+      "compiler": "gradle",
+      "url": "git@codeup.aliyun.com:5f02b00162b03dd98afb1b5a/aero-iot/aero-virtual-device.git"
+    },
+    {
+      "id": 3,
+      "projectName": "bchd-group-iot",
+      "versionControl": "git",
+      "compiler": "gradle",
+      "url": "git@codeup.aliyun.com:5f02b00162b03dd98afb1b5a/aero-iot/bchd-group-iot.git"
+    },
+    {
+      "id": 4,
+      "projectName": "aero-ops",
+      "versionControl": "git",
+      "compiler": "gradle",
+      "url": "git@codeup.aliyun.com:5f02b00162b03dd98afb1b5a/aero-iot/aero-ops.git"
+    },
+    {
+      "id": 5,
+      "projectName": "aero-common",
+      "versionControl": "svn",
+      "compiler": "maven",
+      "url": "git@codeup.aliyun.com:5f02b00162b03dd98afb1b5a/aero-iot/aero-common.git"
+    },
+    {
+      "id": 6,
+      "projectName": "spring-boot-gradle",
+      "versionControl": "git",
+      "compiler": "gradle",
+      "url": "git@github.com:taomee517/spring-boot-gradle.git"
+    },
+    {
+      "id": 7,
+      "projectName": "aero-eureka",
+      "versionControl": "git",
+      "compiler": "gradle",
+      "url": "git@github.com:taomee517/aero-eureka.git"
+    }
+  ]
+}

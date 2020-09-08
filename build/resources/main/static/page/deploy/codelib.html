@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>code library</title>
+        <!--favicon未能正常显示，还需查看原因-->
+        <link href="favicon.ico" rel="icon" type="image/x-icon" />
+        <link rel="stylesheet" href="/layui/css/layui.css" media="all"/>
+        <script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+        <script type="text/javascript" src="/layui/layui.js"></script>
+        <style>
+            body{
+                margin: 10px;
+            }
+            .demo-carousel{
+                height: 200px;
+                line-height: 200px;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+    <table class="layui-hide" id="codelib" lay-filter="codelib"></table>
+    <script type="text/html" id="pipelineBar">
+        <a class="layui-btn layui-btn-primary layui-btn-xs jump_refresh_url" lay-event="pipeline" href="/page/deploy/pipeline.html">进入流水线</a>
+    </script>
+    <script type="text/javascript">
+        layui.use(['laydate', 'laypage', 'layer', 'table'], function(){
+            var laydate = layui.laydate //日期
+                ,laypage = layui.laypage //分页
+                ,layer = layui.layer //弹层
+                ,table = layui.table //表格
+
+
+            //执行一个 table 实例
+            table.render({
+                elem: '#codelib'
+                ,method: 'POST'	//请求方法，默认为 GET
+                ,url: '/codeLib/list' //数据接口
+                // ,method: 'GET'	//请求方法，默认为 GET
+                // ,url: '/common/json/codes.json' //数据接口
+                ,contentType: 'application/json'
+                // ,where : {
+                    // mac: $("#mac").val(),
+                    // sensorName: $("#sensorName").val(),
+                    // status: $("#status").val(),
+                    // sensorType: $("#sensorType").val()
+                // }
+                ,request:{
+                    pageName:'pageIndex',
+                    limitName: 'pageSize'
+                }
+                ,title: '代码仓库表'
+                ,page: true //开启分页
+                ,limit: 10 //每页默认展示多少条数据, 默认是10条
+                ,defaultToolbar: ['filter','exports']
+                ,toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+                ,totalRow: false //开启合计行
+                ,cols: [[ //表头
+                    {type: 'checkbox', fixed: 'left'}
+                    ,{field: 'id', title: 'ID', width:80, hide: true}
+                    ,{field: 'projectName', title: '项目名称', width:200, sort: true, fixed: 'left'}
+                    ,{field: 'versionControl', title: '版本控制', width:100}
+                    ,{field: 'compiler', title: '编译工具', width:100}
+                    ,{field: 'cloneType', title: '克隆方式', width:100}
+                    ,{field: 'url', title: '代码仓库', width:600}
+                    ,{fixed: 'right', title: '操作', width: 120, align:'center', toolbar: '#pipelineBar'}
+                ]]
+                ,id: 'tableLoad'
+            });
+
+            //监听头工具栏事件 用toobar
+            table.on('toolbar(codelib)', function(obj){
+                var checkStatus = table.checkStatus(obj.config.id)
+                    ,data = checkStatus.data; //获取选中的数据
+                switch(obj.event){
+                    case 'add':
+                        ADDDIV = layer.open({
+                            type: 2,
+                            maxmin: false,
+                            shift: 4,
+                            shadeClose: true,
+                            title: "添加代码库",
+                            shade: [0.8, "#ccc"],
+                            offset: 'auto',
+                            area: ["450px","450px"],
+                            content: "codeAdd.html"
+                        });
+                        break;
+                    case 'update':
+                        if(data.length === 0){
+                            layer.msg('请选择一行');
+                        } else if(data.length > 1){
+                            layer.msg('只能同时编辑一个');
+                        } else {
+                            ADDDIV = layer.open({
+                                type: 2,
+                                maxmin: false,
+                                shift: 4,
+                                shadeClose: true,
+                                title: "编辑代码库",
+                                shade: [0.8, "#ccc"],
+                                offset: 'auto',
+                                area: ["500px", "500px"],
+                                content: "codeEdit.html?codeLibId="+checkStatus.data[0].id
+                            });
+                        }
+                        break;
+                    case 'delete':
+                        if(data.length === 0){
+                            layer.msg('请选择一行');
+                        } else {
+                            var MASK = layer.load('正在处理数据,请稍候...', 0);
+                            var ids = [];
+                            $.each(data,function (index,item) {
+                                ids.push(item.id);
+                            })
+                            $.ajax({
+                                url:"/codeLib/delete",
+                                dataType:"json",
+                                data:{"codeIds":ids.join(",")},
+                                method:"DELETE",
+                                success:function(data){
+                                    if(data.status.statusCode===200){
+                                        window.location.reload();
+                                    }else{
+                                        layer.close(MASK);
+                                        layer.msg('操作失败:'+data.status.message, {icon: 5});
+                                    }
+                                },
+                                error:function(data){
+                                    layer.close(MASK);
+                                    layer.msg("删除代码库失败,请检查");
+                                }
+                            });
+                        }
+                        break;
+                };
+            });
+
+            //监听行工具事件 用tool
+            table.on('tool(codelib)', function (obj) {
+                var data = obj.data;
+                if(obj.event === 'pipeline'){
+                    var projectName = data.projectName;
+                    localStorage.setItem("project", projectName);
+                    localStorage.setItem("codeLibrary", data.url);
+                    localStorage.setItem("versionControl", data.versionControl);
+                    localStorage.setItem("compiler", data.compiler);
+                    var url = $(this).attr('href');
+                    top.refreshHighlight(url);
+                }
+            })
+
+
+            //分页
+            laypage.render({
+                elem: 'pageDemo' //分页容器的id
+                ,count: 100 //总页数
+                ,skin: '#1E9FFF' //自定义选中色值
+                //,skip: true //开启跳页
+                ,jump: function(obj, first){
+                    if(!first){
+                        layer.msg('第'+ obj.curr +'页', {offset: 'b'});
+                    }
+                }
+            });
+
+        });
+    </script>
+    </body>
+</html>

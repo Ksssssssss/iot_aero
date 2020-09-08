@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>device debug page</title>
+        <link href="favicon.ico" rel="icon" type="image/x-icon" />
+        <link rel="stylesheet" href="/layui/css/layui.css">
+        <script src="/jquery/jquery-3.5.1.min.js"></script>
+        <script type="text/javascript" src="/layui/layui.js"></script>
+    </head>
+    <body>
+        <div style="margin-top: 10px">
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-sm addItem">新增集群</button>
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-sm batchDelete">批量删除</button>
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-sm scala">展开/收起</button>
+            <button type="button" class="layui-btn layui-btn-primary layui-btn-sm refresh">刷新</button>
+        </div>
+        <table class="layui-table layui-form" id="tree-table" lay-size="sm"></table>
+        <script type="text/javascript">
+            layui.config({
+                base: '/tree-table/js/',
+            })
+            layui.use(['treeTable','layer','code', 'form'],function(){
+                var o = layui.$,
+                    form = layui.form,
+                    layer = layui.layer,
+                    treeTable = layui.treeTable;
+
+                var	re = treeTable.render({
+                    elem: '#tree-table',
+                    // data: treeData,
+                    // toolbar: '#toolbarDemo',
+                    url:"/cluster/all",
+                    page: false,
+                    icon_key: 'title',
+                    is_checkbox: true,
+                    end: function(e){
+                        // console.dir(e);
+                        form.render();
+                    },
+                    cols: [
+                        {
+                            key: 'title',
+                            title: '名称',
+                            width: '200px',
+                            template: function(item){
+                                if(item.level == 0){
+                                    return '<span style="font-weight:bold;">'+item.title+'</span>';
+                                }else if(item.level == 1){
+                                    var color = item.status?"green":"red;font-weight:bold;";
+                                    return '<span style="color:'+ color +'">'+item.title+'</span>';
+                                }
+                            }
+                        },
+                        {
+                            key: 'id',
+                            title: 'ID',
+                            width: '100px',
+                            align: 'center',
+                        },
+                        {
+                            key: 'pid',
+                            title: 'PARENT ID',
+                            width: '100px',
+                            align: 'center',
+                        },
+                        {
+                            key: 'updTime',
+                            title: '更新时间',
+                            width: '250px',
+                            align: 'center',
+                            template: function(item) {
+                                if (item.level == 0) {
+                                    return "";
+                                }else {
+                                    var time = item.updTime;
+                                    if(time==null||time==='undefined'||time===''){
+                                        return "";
+                                    }else {
+                                        return time;
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            key: 'url',
+                            title: 'URL',
+                            width: '100px',
+                            align: 'center',
+                            template: function(item) {
+                                if (item.level == 0) {
+                                    return "";
+                                }else {
+                                    return item.url;
+                                }
+                            }
+                        },
+                        {
+                            key: 'status',
+                            title: '状态',
+                            width: '100px',
+                            align: 'center',
+                            template: function(item){
+                                if(item.level == 0){
+                                    return "";
+                                }
+                                var checkStr = item.status?"checked='checked'":"";
+                                return '<input type="checkbox" name="status" disabled value='+ item.status +' lay-skin="switch" lay-text="ON|OFF"' + checkStr +'>';
+                            }
+                        },
+                        {
+                            title: '操作',
+                            align: 'center',
+                            width: '300px',
+                            template: function(item){
+                                return '<a lay-filter="add">添加节点</a> | <a target="_blank"  lay-filter="edit">编辑</a>';
+                            }
+                        }
+                    ]
+                });
+                
+                // 监听自定义
+                treeTable.on('tree(add)',function(data){
+                    layer.open({
+                        type: 2,
+                        maxmin: true,
+                        shift: 4,
+                        shadeClose: true,
+                        title: "添加节点",
+                        shade: [0.8, "#ccc"],
+                        area: ["600px", "560px"],
+                        content: "clusterAdd.html?clusterType=2"
+                    });
+                });
+
+                treeTable.on('tree(edit)',function (data) {
+                    layer.open({
+                        type: 2,
+                        maxmin: true,
+                        shift: 4,
+                        shadeClose: true,
+                        title: "修改节点",
+                        shade: [0.8, "#ccc"],
+                        area: ["600px", "560px"],
+                        content: "clusterEdit.html?id=" + data.item.id
+                    });
+
+                });
+
+                // 获取选中值，返回值是一个数组（定义的primary_key参数集合）
+                o('.batchDelete').click(function(){
+                    var ids = treeTable.checked(re);
+                    if(ids==="undefined"||ids.length===0){
+                        layer.msg('请先选中要删除的项！');
+                        return;
+                    }
+                    var clusterIds = treeTable.checked(re).join(',');
+                    layer.confirm('确定要【批量删除】所勾选的节点吗？', function(index){
+                        var MASK = layer.load('正在处理数据,请稍候...', 0);
+                        $.ajax({
+                            url:"/cluster/delete",
+                            dataType:"json",
+                            data:{"clusterIds":clusterIds},
+                            type:"DELETE",
+                            success:function(data){
+                                if(data.status.statusCode===200){
+                                    window.location.reload();
+                                }else{
+                                    layer.close(MASK);
+                                    layer.msg('操作失败:'+data.status.message, {icon: 5});
+                                }
+                            },
+                            error:function(data){
+                                layer.close(MASK);
+                                layer.msg("删除节点失败,请检查");
+                            }
+                        });
+                    });
+                })
+
+                //新增集群
+                o('.addItem').click(function () {
+                    // re.data.push({"id":50,"pid":0,"title":"1-4"});
+                    // treeTable.render(re);
+                   layer.open({
+                        type: 2,
+                        maxmin: true,
+                        shift: 4,
+                        shadeClose: true,
+                        title: "添加集群",
+                        shade: [0.8, "#ccc"],
+                        area: ["400px", "300px"],
+                        content: "clusterAdd.html?clusterType=1"
+                    });
+                })
+
+                // 展开/关闭
+                o('.scala').click(function(){
+                    var treeId = re.elem.substr(1);
+                    var showIds = localStorage.getItem(treeId);
+                    if(showIds==null||showIds==='undefined'||showIds===''){
+                        treeTable.openAll(re);
+                        this.innerHTML = "收起";
+                    }else {
+                        treeTable.closeAll(re);
+                        this.innerHTML = "展开";
+                    }
+                })
+
+                // 刷新重载树表（一般在异步处理数据后刷新显示）
+                o('.refresh').click(function(){
+                    treeTable.render(re);
+                })
+
+            })
+        </script>
+    </body>
+</html>

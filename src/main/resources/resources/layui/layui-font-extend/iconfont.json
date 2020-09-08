@@ -1,0 +1,23 @@
+{
+  "id": "1924287",
+  "name": "layui",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "2279452",
+      "name": "箭头",
+      "font_class": "jiantou-down",
+      "unicode": "e631",
+      "unicode_decimal": 58929
+    },
+    {
+      "icon_id": "2279512",
+      "name": "箭头",
+      "font_class": "jiantou-up",
+      "unicode": "e633",
+      "unicode_decimal": 58931
+    }
+  ]
+}

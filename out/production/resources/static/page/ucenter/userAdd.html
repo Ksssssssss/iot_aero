@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>添加用户</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/layui/css/layui.css"  media="all">
+    <script src="//g.alicdn.com/dingding/dinglogin/0.0.5/ddLogin.js"></script>
+</head>
+<body>
+
+<form class="layui-form" action="" lay-filter="example" style="margin-top: 20px;">
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">绑定钉钉</label>
+        <div class="layui-input-inline">
+            <div id="login_container"></div>
+        </div>
+
+    </div>
+    <div class="layui-form-item" style="display: none" id="scanResultDiv">
+        <label class="layui-form-label">扫码响应</label>
+        <div class="layui-input-inline">
+            <input type="hidden" id ="realName" lay-verify="realName"  name="realName"/>
+            <input type="hidden" id ="dingtalkUserId" name="dingtalkUserId"/>
+        </div>
+        <div class="layui-form-mid layui-word-aux" id="scanResultMsg">
+            员工名字：<b id="realNameSpan" style="color: red!important;"></b>
+            ,在企业内的唯一标识：<b id="userIdSpan" style="color: red!important;"></b>
+        </div>
+
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">用户角色</label>
+        <div class="layui-input-inline">
+            <select name="roleId" id = "roleIdSelect" lay-verify="required" lay-search="">
+                <option value="">直接选择/搜索选择</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">启用禁用</label>
+        <div class="layui-input-inline">
+            <input type="radio" name="enable" value="Y" title="启用" checked="">
+            <input type="radio" name="enable" value="N" title="禁用">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <!--<button type="button" class="layui-btn layui-btn-normal" id="LAY-component-form-setval">赋值</button>
+            <button type="button" class="layui-btn layui-btn-normal" id="LAY-component-form-getval">取值</button>-->
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">提交</button>
+        </div>
+    </div>
+</form>
+</fieldset>
+<script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+<script src="/layui/layui.js" charset="utf-8"></script>
+<script>
+    // <%
+    // String path = request.getContextPath();
+    // String appid = SystemParameterConfig_SiRui.me().get(SystemParameterConfig_SiRui.DING_APP_ID);
+    // //    String baseURL = SystemParameterConfig_SiRui.me().get(SystemParameterConfig_SiRui.DING_BASE_URL);
+    // // TODO: 2019/11/5 这里暂时写死，后面需配置到数据库中
+    // //    String baseURL = path + "http://localhost:40000/user/scanDingtlak";
+    // String baseURL = SystemParameterConfig_SiRui.me().get(GlobalConstant.KEY_SCAN_DINGTLAK_BOUNDUSER_CALLBACK_URL);
+    // String enc_baseURL = URLEncoder.encode(baseURL);
+    // %>
+
+    // var path = "http://localhost:9740/ucenter/scanDingtlak";
+    // var baseURL = "http://localhost:9740/ucenter/scanDingtlak";
+    // var enc_baseURL = "http://%6c%6f%63%61%6c%68%6f%73%74:%39%37%34%30/%75%63%65%6e%74%65%72/%73%63%61%6e%44%69%6e%67%74%6c%61%6b";
+    // var appid = "dingoas0hv0rn2mynbwpdt";
+
+    layui.use('form', function(){
+        var form = layui.form
+            ,layer = layui.layer;
+
+        $.ajax({
+            url:"/common/json/role.json", //请求的url地址
+            dataType:"json", //返回格式为json
+            contentType: "application/json",
+            async:false,//请求是否异步，默认为异步，这也是ajax重要特性
+            // data:{"roleIds":roleId}, //参数值
+            type:"GET",//请求方式,
+            success:function(data){
+                // console.log(data);
+                var sel = $('#roleIdSelect');
+                $.each(data.data, function (index, element) {
+                    sel.append(new Option(element.roleName,element.id));
+                });
+                form.render('select'); //刷新select选择框渲染
+            },
+            error:function(data){
+                layer.msg(data);
+            }
+        });
+
+
+
+        var code;
+        var url = window.location.search;
+        if (url != null && url != "") {
+            var Request = new Object();
+            Request = GetRequest();
+            code = Request['code'];
+            if (code != null && code != "") {
+                idconfirm();
+            }
+        }
+
+        function idconfirm() {
+            var MASK = layer.load('正在处理数据,请稍候...', 0);
+            $.ajax({
+                url: "/user/scanDingtlak",
+                data: {"code": code},
+                type: "post",
+                dataType: "JSON",
+                success: function (data) {
+                    // console.log(data);
+                    var result = data.result;
+                    if(result.resultCode==0){
+                        layer.close(MASK);
+                        var entity = data.entity;
+                        if(!entity.active){
+                            layer.msg('该用户未激活，请联系钉钉管理员!', {icon: 5});
+                            return false;
+                        }
+                        var name = entity.name;
+                        var userid = entity.userid;
+                        $('#realName').val(name);
+                        $('#dingtalkUserId').val(userid);
+                        $('#realNameSpan').text(name);
+                        $('#userIdSpan').text(userid);
+                        $('#scanResultDiv').show();
+                    }else{
+                        layer.close(MASK);
+                        layer.msg('操作失败:'+result.resultMessage, {icon: 5});
+                    }
+                },
+                error: function (data) {
+                    layer.close(MASK);
+                    layer.msg("操作失败,请检查");
+                }
+            });
+        }
+
+        function GetRequest() {
+            var url = location.search; //获取url中"?"符后的字串
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                for (var i = 0; i < strs.length; i++) {
+                    theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+                }
+            }
+            return theRequest;
+        }
+
+
+        //自定义验证规则
+        form.verify({
+            realName: function(value){
+                if(value.length <=0){
+                    return '请先打开钉钉扫描二维码';
+                }
+            }
+            ,content: function(value){
+                layedit.sync(editIndex);
+            }
+        });
+
+        //监听提交
+        form.on('submit(demo1)', function(data){
+           /* layer.alert(JSON.stringify(data.field), {
+                title: '最终的提交信息'
+            })*/
+            var MASK = layer.load('正在处理数据,请稍候...', 0);
+            $.ajax({
+                url: "/user/addUser",
+                type: 'POST',
+                data: JSON.stringify(data.field),
+                dataType: "json", // 响应的数据类型
+                contentType: "application/json",
+                success: function (data) {
+                    var result = data.result;
+                    if(result.resultCode==0){
+                        layer.close(layer.index);
+                        window.parent.location.reload();
+                    }else{
+                        layer.close(MASK);
+                        layer.msg('操作失败:'+result.resultMessage, {icon: 5});
+                    }
+                },
+                error: function (data) {
+                    layer.close(MASK);
+                    layer.msg("添加用户失败,请检查");
+                }
+            });
+            return false;
+        });
+
+      /*  //表单赋值
+        layui.$('#LAY-component-form-setval').on('click', function(){
+            form.val('example', {
+                "realName": "贤心" // "name": "value"
+                ,"enable": "女"
+            });
+        });
+
+        //表单取值
+        layui.$('#LAY-component-form-getval').on('click', function(){
+            var data = form.val('example');
+            alert(JSON.stringify(data));
+        });*/
+
+    });
+
+
+
+    var obj = DDLogin({
+        id: "login_container",//这里需要你在自己的页面定义一个HTML标签并设置id，例如<div id="login_container"></div>或<span id="login_container"></span>
+        //编码前的url: https://oapi.dingtalk.com/connect/oauth2/sns_authorize?appid=dingoagctebsx3vxwqu8da&response_type=code&scope=snsapi_login&state=STATE&redirect_uri=http://localhost:40000/login
+        goto: "https%3a%2f%2foapi.dingtalk.com%2fconnect%2foauth2%2fsns_authorize%3fappid%3d"+appid+"%26response_type%3dcode%26scope%3dsnsapi_login%26state%3dSTATE%26redirect_uri%3d" + enc_baseURL,
+        style: "border:none;background-color:rgba(255,255,255,0.2);margin-top:-32px",
+        width: "365",
+        height: "260"
+    });
+
+    var hanndleMessage = function (event) {
+        var origin = event.origin;
+        // console.log("origin", event.origin);
+        if (origin == "https://login.dingtalk.com") { //判断是否来自ddLogin扫码事件。
+            var loginTmpCode = event.data; //拿到loginTmpCode后就可以在这里构造跳转链接进行跳转了
+            // console.log("loginTmpCode", loginTmpCode);
+            window.location.href = "https://oapi.dingtalk.com/connect/oauth2/sns_authorize?appid="+appid+"&response_type=code&scope=snsapi_login&state=STATE&redirect_uri="+baseURL+"&loginTmpCode=" + loginTmpCode;
+
+        }
+
+    };
+
+
+    if (typeof window.addEventListener != 'undefined') {
+        window.addEventListener('message', hanndleMessage, false);
+    } else if (typeof window.attachEvent != 'undefined') {
+        window.attachEvent('onmessage', hanndleMessage);
+    }
+</script>
+
+</body>
+</html>

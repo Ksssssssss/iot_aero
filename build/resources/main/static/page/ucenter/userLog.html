@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>登录日志管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/layui/css/layui.css"  media="all">
+    <script type="text/javascript" src="/common/js/common.js"></script>
+</head>
+<body>
+<div class="layui-fluid" style="margin-top:20px">
+    <div class="layui-card">
+        <div class="layui-form layui-card-header" style="border-bottom:none!important;display: none">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">真实姓名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="realName" id="realName" placeholder="模糊匹配" autocomplete="off" class="layui-input"/>
+                    </div>
+                </div>
+
+                <div class="layui-inline layui-text">
+                    <a class="layui-btn  layui-btn-sm" id="do_search">
+                        <i class="layui-icon">&#xe615;</i>
+                        查询
+                    </a>
+                </div>
+            </div>
+        </div>
+        <table class="layui-hide" id="test" lay-filter="test"></table>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+<script src="/layui/layui.js" charset="utf-8"></script>
+
+<script>
+    var userId = getUrlParam("userId");
+    layui.use('table', function(){
+        var table = layui.table;
+
+        table.render({
+            elem: '#test'
+            ,url:'/login/loginLogList?userId='
+            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,cols: [[
+                {type:'numbers',title:'行号',align:'center'}
+                // {type:'checkbox', fixed: 'left'}
+                ,{field:'LOG_ID', title: 'ID', sort: true,width: 100,align:'center'}
+                ,{field:'REAL_NAME', title: '真实姓名',align:'center',width: 120} //width 支持：数字、百分比和不填写。你还可以通过 minWidth 参数局部定义当前单元格的最小宽度，layui 2.2.1 新增
+                ,{field:'LOGTIN_TIME', title: '登录时间',align:'center', sort: true}
+            ]]
+            ,page: true
+            , request: {
+                pageName: 'page', //页码的参数名称，默认：page
+                limitName: 'rows' //每页数据量的参数名，默认：limit
+            }
+        });
+
+
+
+        // 执行搜索，表格重载
+        $('#do_search').on('click', function () {
+            // 搜索条件
+            var realName = $('#realName').val();
+            var enable = $('#enable').val();
+            table.reload('test', {
+                method: 'get'
+                , where: {
+                    realName: realName,
+                    enable: enable,
+                }
+                , request: {
+                    pageName: 'page', //页码的参数名称，默认：page
+                    limitName: 'rows' //每页数据量的参数名，默认：limit
+                }
+            });
+        });
+
+        //回车事件
+        $('#realName').bind('keypress', function (event) {
+            if (event.keyCode == "13") {
+                $("#do_search").click();
+            }
+        });
+
+    });
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>实时监控数据</title>
+    <link rel="stylesheet" href="/layui/css/layui.css" media="all"/>
+    <script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <script type="text/javascript" src="/echarts/echarts.min.js"></script>
+</head>
+<body>
+    <div class="layui-row">
+        <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+        <div class="layui-col-md6 layui-col-lg6 layui-col-sm6" id="cpu" style="height:400px;"></div>
+        <div class="layui-col-md6 layui-col-lg6 layui-col-sm6" id="memory" style="height:400px;"></div>
+    </div>
+    <div class="layui-row">
+        <div class="layui-col-md6 layui-col-lg6 layui-col-sm6" id="tcp" style="height:400px;"></div>
+        <div class="layui-col-md6 layui-col-lg6 layui-col-sm6" id="udp" style="height:400px;"></div>
+    </div>
+
+    <hr class="layui-bg-gray" style="margin: 20px 0px 20px 0px">
+
+    <form class="layui-form" id="searchForm" action="">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">ServiceType</label>
+                <div class="layui-input-block">
+                    <select name="serviceType" disabled id="serviceTypeSelect" lay-filter="serviceType">
+                        <option value="system" selected="selected">system</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">领域</label>
+                <div class="layui-input-block">
+                    <select name="metricSet" id="metricSetSelect" lay-filter="metricSet">
+                        <option value="cpu" selected="selected">cpu</option>
+                        <option value="process">process</option>
+                        <option value="network">network</option>
+                        <option value="memory">memory</option>
+                        <option value="filesystem">filesystem</option>
+                        <option value="fsstat">fsstat</option>
+                        <option value="uptime">uptime</option>
+                        <option value="process_summary">process_summary</option>
+                        <option value="socket_summary">socket_summary</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">参数</label>
+                <div class="layui-input-block">
+                    <select name="coreParaKey" id="coreParaKeytSelect" lay-filter="coreParaKey">
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">服务器</label>
+                <div class="layui-input-block">
+                    <select name="hostName" id="hostNameSelect" lay-filter="hostName">
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">时间范围</label>
+                <div class="layui-input-inline">
+                    <select name="rangeHours" id="rangeHoursSelect" lay-filter="rangeHours">
+                        <option value="1" selected="selected">1小时</option>
+                        <option value="4" >4小时</option>
+                        <option value="24" >24小时</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+    <div id="custom" style="width: 100%;height:400px;"></div>
+</body>
+<script>
+    layui.use(['jquery','layer', 'form'],function() {
+        var $ = layui.$,
+        form = layui.form,
+        layer = layui.layer;
+
+        var cpuChart = echarts.init(document.getElementById('cpu'));
+        var memoryChart = echarts.init(document.getElementById('memory'));
+        var tcpChart = echarts.init(document.getElementById('tcp'));
+        var udpChart = echarts.init(document.getElementById('udp'));
+        var customChart = echarts.init(document.getElementById('custom'));
+
+        $(function () {
+            $.ajax({
+                url: "/realtime/cpu",
+                type: 'GET',
+                dataType: "json",
+                contentType: "application/json",
+                success: function (result) {
+                    var multiChart = result.data;
+                    var status = result.status;
+                    if(status.statusCode===200) {
+                        var option = buildOption('CPU', multiChart.legend, multiChart.chartMap,true);
+                        cpuChart.setOption(option);
+
+                        var option = buildOption('Custom Chart', multiChart.legend, multiChart.chartMap,true);
+                        customChart.setOption(option);
+                    }
+                }
+            });
+
+            $.ajax({
+                url: "/realtime/memory",
+                type: 'GET',
+                dataType: "json",
+                contentType: "application/json",
+                success: function (result) {
+                    var multiChart = result.data;
+                    var status = result.status;
+                    if(status.statusCode===200) {
+                        var option = buildOption('内存', multiChart.legend, multiChart.chartMap, true);
+                        memoryChart.setOption(option);
+                    }
+                }
+            });
+
+            $.ajax({
+                url: "/realtime/tcp",
+                type: 'GET',
+                dataType: "json",
+                contentType: "application/json",
+                success: function (result) {
+                    var multiChart = result.data;
+                    var status = result.status;
+                    if(status.statusCode===200) {
+                        var option = buildOption('TCP', multiChart.legend, multiChart.chartMap, false);
+                        tcpChart.setOption(option);
+                    }
+                }
+            });
+
+            $.ajax({
+                url: "/realtime/udp",
+                type: 'GET',
+                dataType: "json",
+                contentType: "application/json",
+                success: function (result) {
+                    var multiChart = result.data;
+                    var status = result.status;
+                    if(status.statusCode===200) {
+                        var option = buildOption('UDP', multiChart.legend, multiChart.chartMap, false);
+                        udpChart.setOption(option);
+                    }
+                }
+            });
+
+            fillHostsAndFields();
+            $("#coreParaKeytSelect").val("system.cpu.user.norm.pct");
+
+        });
+
+
+        function fillHostsAndFields() {
+            var query = {
+                serviceType: $("#serviceTypeSelect").val(),
+                    metricSet: $("#metricSetSelect").val()
+            }
+
+            $.ajax({
+                url: "/realtime/getAllServers",
+                type: 'GET',
+                data: query,
+                dataType: "json",
+                contentType: "application/json",
+                success: function (result) {
+                    var status = result.status;
+                    if(status.statusCode===200) {
+                        var serverSelect = $("#hostNameSelect");
+                        serverSelect.empty();
+                        serverSelect.append(new Option("ALL", "", true, true));
+                        $.each(result.data, function (index, element) {
+                            serverSelect.append(new Option(element, element));
+                        });
+                        form.render('select')
+                    }
+                }
+            });
+
+            $.ajax({
+                url: "/realtime/getAllFields",
+                type: 'GET',
+                data: query,
+                dataType: "json",
+                contentType: "application/json",
+                success: function (result) {
+                    var status = result.status;
+                    if(status.statusCode===200) {
+                        var fieldSelect = $("#coreParaKeytSelect");
+                        fieldSelect.empty();
+                        $.each(result.data, function (index, element) {
+                            fieldSelect.append(new Option(element, element));
+                        });
+                        form.render('select')
+                    }
+                }
+            });
+        }
+
+
+
+        function buildOption(title, legend, multiMap, pctAxis){
+            var newData = [];
+            for(let item in multiMap) {
+                const lineItem = new serLineItem();
+                lineItem.name = item;
+                lineItem.data = multiMap[item];
+                newData.push(lineItem);
+            }
+            var yAxis = {
+                type: 'value',
+                boundaryGap: [0, '100%'],
+                axisLabel: {
+                    show: true,
+                    interval: 'auto'
+                },
+                splitLine: {
+                    show: false
+                }
+            };
+            if(pctAxis){
+                yAxis.min = 0;
+                yAxis.max = 1;
+                yAxis.axisLabel = {
+                    show: true,
+                    interval: 'auto',
+                    formatter: function(value,index) {
+                        return (value * 100).toFixed(0)+'%';
+                    }
+                };
+            }
+            option = {
+                title: {
+                    left: 'center',
+                    text: title
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    // axisPointer: {
+                    //     animation: false
+                    // }
+                },
+                legend: {
+                    top:"6%",
+                    // orient: 'vertical',
+                    data: legend
+                },
+                xAxis: {
+                    type: 'time',
+                    minInterval: 5 * 60 * 1000,
+                    maxInterval: 4 * 60 * 60 * 1000,
+                    splitLine: {
+                        show: false
+                    }
+                },
+                yAxis: yAxis,
+                series: newData
+            };
+            return option;
+        }
+
+        var serLineItem = function () {
+            return {
+                name: '',
+                data: [],
+                type: 'line',
+                smooth: true,
+                showSymbol: false,
+                hoverAnimation: false,
+                lineStyle:{
+                    width:1
+                }
+            }
+        };
+
+        form.on("select", function () {
+            var selectId = this.parentNode.parentNode.previousElementSibling.id;
+            if(selectId==="metricSetSelect"){
+                fillHostsAndFields();
+            }else {
+                $.ajax({
+                    url: "/realtime/custom",
+                    type: 'POST',
+                    data: JSON.stringify({
+                        serviceType: $("#serviceTypeSelect").val(),
+                        metricSet: $("#metricSetSelect").val(),
+                        coreParaKey: $("#coreParaKeytSelect").val(),
+                        hostName: $("#hostNameSelect").val(),
+                        rangeHours: $("#rangeHoursSelect").val()
+                    }),
+                    dataType: "json",
+                    contentType: "application/json",
+                    success: function (result) {
+                        var multiChart = result.data;
+                        var status = result.status;
+                        if (status.statusCode === 200) {
+                            customChart.clear();
+                            var option = buildOption('Custom Chart', multiChart.legend, multiChart.chartMap, false);
+                            customChart.setOption(option);
+                        } else {
+                            layer.msg(status.message);
+                        }
+                    }
+                });
+            }
+        });
+
+        // setInterval(function () {
+        //  }, 30000);
+    })
+</script>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>sqlserver数据库查询</title>
+    <link rel="stylesheet" href="/layui/css/layui.css" media="all"/>
+    <script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <style>
+        body{
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+<form class="layui-form" id="searchForm" action="">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">数据库</label>
+            <div class="layui-input-block">
+                <select name="databaseList" id="databaseList" lay-filter="databaseList">
+                    <option value="" selected="">请选择数据库</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">表</label>
+            <div class="layui-input-block">
+                <select name="tableList" id="tableList" lay-filter="tableList">
+                    <option value="" selected="">请选择表</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline">
+            <!--把页面的< button>标签替换为< input type=‘button’ />标签可避免form参数被重置-->
+            <input type='button' class="layui-btn search-btn" id="btnSearch" value="查询"/>
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">查询语句</label>
+        <div class="layui-input-block">
+            <textarea id="queryString" class="layui-textarea"></textarea>
+        </div>
+    </div>
+</form>
+<table class="layui-hide" id="table-list" lay-filter="coredata"></table>
+<script type="text/javascript">
+    let cols = [];
+    layui.use(['laydate', 'laypage', 'layer', 'table', 'form'], function(){
+        var laydate = layui.laydate //日期
+            ,laypage = layui.laypage //分页
+            ,layer = layui.layer //弹层
+            ,table = layui.table //表格
+            ,form = layui.form //表单
+
+        $.get('/sqlserver/databases', function (data) {
+            if (data.status.statusCode===200) {
+                var databaseSelect = $("#databaseList");
+                var databases = data.data;
+                for (let k in databases) {
+                    databaseSelect.append(new Option(databases[k]));
+                }
+                form.render('select');
+            }
+        });
+
+        //监听下拉事件
+        form.on('select(databaseList)', function(data){
+            if (data.value != "") {
+                $.get('/sqlserver/getTables?database=' + data.value, function (data) {
+                    if (data.status.statusCode===200) {
+                        var tableSelect = $("#tableList");
+                        tableSelect.empty();
+                        tableSelect.append(new Option("请选择表","", true, true))
+                        var tables = data.data;
+                        for (let k in tables) {
+                            tableSelect.append(new Option(tables[k]));
+                        }
+                    }
+                    form.render('select');
+                });
+            }
+        });
+
+        //监听下拉事件
+        form.on('select(tableList)', function(data){
+            if ($("#tableList").val() != "") {
+                $("#queryString").val("select * from " + $("#databaseList").val() + ".dbo." + $("#tableList").val() + ";");
+            }
+        });
+
+        //分页
+        laypage.render({
+            elem: 'pageDemo' //分页容器的id
+            ,count: 100 //总页数
+            ,skin: '#1E9FFF' //自定义选中色值
+            //,skip: true //开启跳页
+            ,jump: function(obj, first){
+                if(!first){
+                    layer.msg('第'+ obj.curr +'页', {offset: 'b'});
+                }
+            }
+        });
+
+        $('#btnSearch').click(function () {
+            var sql = $("#queryString").val();
+            if(sql==='' || sql==='undefined'){
+                layer.msg("查询语句不能为空！");
+                return
+            }
+            $.get('/sqlserver/getColumns?database=' + $("#databaseList").val() + '&table=' + $("#tableList").val(),
+                function (data) {
+                    if (data != null && data.status.statusCode===200) {
+                        cols = [];
+                        var colomns = data.data;
+                        for (let i = 0; i < colomns.length; i++) {
+                            if (colomns[i] == '_id') {
+                                cols.push({type: 'numbers', title: '序号', fixed: 'left'})
+                            } else {
+                                cols.push({field: colomns[i], title: colomns[i], minWidth: 150})
+                            }
+                        }
+                        //执行一个 table 实例
+                        table.render({
+                            elem: '#table-list'
+                            ,method: 'POST'	//请求方法，默认为 GET
+                            ,url: '/sqlserver/query' //数据接口
+                            ,contentType: 'application/json'
+                            ,where : {
+                                database: $("#databaseList").val(),
+                                table: $("#tableList").val(),
+                                orderField: cols[0].title,
+                                query: $("#queryString").val()
+                            }
+                            ,request:{
+                                pageName:'pageIndex',
+                                limitName: 'pageSize'
+                            }
+                            ,title: 'sqlserver表'
+                            ,page: true //开启分页
+                            ,limit: 10 //每页默认展示多少条数据, 默认是10条
+                            ,totalRow: false //开启合计行
+                            ,cols: [cols]
+                            ,done: function(res, curr, count){
+                                console.log(res);
+                            }
+                            ,id: 'tableLoad'
+                        });
+                    }
+                });
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+server:
+  port: 9740
+
+
+spring:
+  mvc:
+    favicon:
+      enabled: true
+  datasource:
+    url: jdbc:sqlserver://192.168.1.29:1433;DatabaseName=HardwarePlatform
+    username: sa
+    password: cry.cap.fox-999
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    filters:  stat,wall,log4j
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+    initialSize:  2
+    minIdle: 1
+    maxActive: 4
+    maxWait: 60000
+  data:
+    mongodb:
+#      uri: mongodb://192.168.1.35:27017/HardwareData
+      uri: mongodb://192.168.1.153:27017/DevOps
+      devops:
+        uri: mongodb://192.168.1.153:27017/DevOps
+      hardware:
+        uri: mongodb://192.168.1.153:27017/HardwareData
+
+    elasticsearch:
+      clusterName: elasticsearch
+      clusterNodes: 192.168.1.154:9300 # 程序连接es的端口号是9300
+  kafka:
+    bootstrap-servers: 192.168.1.154:9092,192.168.1.152:9092,192.168.1.151:9092
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.bchd.ops.entity.po
+
+app:
+  start:
+    timeOut: 120000
+
+monitor:
+  warning:
+    spec:
+      cpu: 0.95
+      memory: 0.95
+      kafka-lag: 10000
+    script:
+      path: D:\soft\scripts\dingRobotWarning.bat
+
+dingtalk:
+  appid: dingoapufsauwuvqjy9zdk
+  appSecret: v0dd2azE64puLdzSW6q7VVwB61mWPTENMtOvZjSlv6jkaIH6ARK17ZZRRU05BbwA
+  baseUrl: http%3A%2F%2F192.168.1.151%3A9740%2Flogin.html
+  encodeBaseUrl: http%3A%2F%2Fdevops.aeroiot.cn%3A9740%2Flogin.html
+
+logging:
+  config: classpath:log4j2-cluster.xml

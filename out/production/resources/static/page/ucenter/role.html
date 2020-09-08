@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>角色管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/layui/css/layui.css"  media="all">
+</head>
+<body>
+<div class="layui-fluid" style="margin-top:20px">
+    <div class="layui-card">
+        <div class="layui-form layui-card-header" style="border-bottom:none!important;">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">角色名称</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="roleName" id="roleName" placeholder="模糊匹配" autocomplete="off" class="layui-input" />
+                    </div>
+                </div>
+
+                <div class="layui-inline">
+                    <label class="layui-form-label">启用/禁用</label>
+                    <div class="layui-input-inline" style="width: 80px;">
+                        <select name="enable" id = "enable">
+                            <option value="">全部</option>
+                            <option value=true>启用</option>
+                            <option value=false>禁用</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="layui-inline layui-text">
+                    <a class="layui-btn  layui-btn-sm" id="do_search">
+                        <i class="layui-icon">&#xe615;</i>
+                        查询
+                    </a>
+                </div>
+            </div>
+        </div>
+        <table class="layui-hide" id="test" lay-filter="test"></table>
+    </div>
+</div>
+
+<script type="text/html" id="headBar">
+    <a class="layui-btn layui-btn-xs" lay-event="add">添加
+        <i class="layui-icon layui-icon-addition"></i>
+    </a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="batchdel">批量删除
+        <i class="layui-icon layui-icon-subtraction"></i>
+    </a>
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    {{# if (d.ROLE_NAME !="超级管理员"){}}
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    {{#}}}
+</script>
+<script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+<script src="/layui/layui.js" charset="utf-8"></script>
+
+<script>
+    var menuTree;
+    layui.use('table', function(){
+        var table = layui.table
+            ,tree = layui.tree
+            ,layer = layui.layer
+            ,util = layui.util;
+
+        table.render({
+            elem: '#test'
+            // ,url:'/common/json/role.json'
+            // ,method: 'GET'
+            ,method: 'POST'
+            ,url: '/role/query' //数据接口
+            ,contentType: 'application/json'
+            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,toolbar: '#headBar'
+            ,cols: [[
+                {type:'checkbox', fixed: 'left'}
+                ,{field:'id', title: 'ID', sort: true,align:'center',width:100}
+                ,{field:'roleName', title: '角色名称',align:'center', sort: true}
+                ,{field:'remark', title: '备注',align:'center'}
+                ,{field:'enable', title: '是否启用',align:'center',width:110, sort: true, templet: function (d) {
+                        var checkStr = d.enable?"checked='checked'":"";
+                        return "<input type='checkbox' disabled name='enable' value=" + d.enable + " lay-skin='switch' lay-text='启用|禁用'  "+ checkStr +"/>"
+                    }}
+                ,{field:'crtTime', title: '创建时间',align:'center', sort: true}
+                ,{field:'updTime', title: '修改时间',align:'center', sort: true}
+                ,{field:'right',title:'操作', align:'center', toolbar: '#barDemo'}
+            ]]
+            ,page: true
+            , request: {
+                pageName:'pageIndex',
+                limitName: 'pageSize'
+            }
+        });
+
+        //监听工具条
+        table.on('tool(test)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'detail'){
+                layer.msg('ID：'+ data.id + ' 的查看操作');
+            } else if(obj.event === 'del'){
+                layer.confirm('确定要删除该角色吗？', function(index){
+                    var roleId = data.id;
+                    if(roleId===1){
+                        layer.msg("超级管理员不能被删除");
+                        return;
+                    }
+                    var MASK = layer.load('正在处理数据,请稍候...', 0);
+                    $.ajax({
+                        url:"/role/delete",
+                        dataType:"json",
+                        data:{"roleIds":roleId},
+                        type:"DELETE",
+                        success:function(data){
+                            var result = data.data;
+                            if(data.status.statusCode===200){
+                                window.location.reload();
+                            }else{
+                                layer.close(MASK);
+                                layer.msg('操作失败:'+result.resultMessage, {icon: 5});
+                            }
+                        },
+                        error:function(data){
+                            layer.close(MASK);
+                            layer.msg("删除角色失败,请检查");
+                        }
+                    });
+                });
+            } else if(obj.event === 'edit'){
+                ADDDIV = layer.open({
+                    type: 2,
+                    maxmin: false,
+                    shift: 4,
+                    shadeClose: true,
+                    title: "编辑角色",
+                    shade: [0.8, "#ccc"],
+                    offset: 'auto',
+                    area: ["500px", "450px"],
+                    content: "roleEdit.html?roleId=" + data.id,
+                    success:function (layero, index) {
+                        var body = layer.getChildFrame('body', index);
+                        body.contents().find("#id").val(data.id);
+                    }
+                });
+
+            }
+        });
+
+
+
+
+        // 执行搜索，表格重载
+        $('#do_search').on('click', function () {
+            // 搜索条件
+            var roleName = $('#roleName').val();
+            var enable = $('#enable').val();
+            table.reload('test', {
+                method: 'POST'
+                ,url: '/role/query' //数据接口
+                ,contentType: 'application/json'
+                , where: {
+                    roleName: roleName,
+                    enable: enable,
+                }
+                , request: {
+                    pageName:'pageIndex',
+                    limitName: 'pageSize'
+                }
+            });
+        });
+
+        //回车事件
+        $('body').keydown(function (event) {
+            if (event.keyCode == "13") {
+                $("#do_search").click();
+            }
+        });
+
+
+        table.on('toolbar(test)', function(obj) {
+            var data = obj.data;
+            if (obj.event === 'add') {
+                ADDDIV = layer.open({
+                    type: 2,
+                    maxmin: false,
+                    shift: 4,
+                    shadeClose: true,
+                    title: "添加角色",
+                    shade: [0.8, "#ccc"],
+                    offset: 'auto',
+                    area: ["500px", "450px"],
+                    content: "roleAdd.html"
+                });
+            }else if(obj.event === 'batchdel'){
+                var checkStatus = table.checkStatus('test')
+                    ,data = checkStatus.data;
+                if(data.length<=0){
+                    layer.msg('请先勾选需要删除的数据!', {icon: 5});
+                }else {
+                    layer.confirm('确定要【批量删除】所勾选的角色吗？', function(index){
+                        var MASK = layer.load('正在处理数据,请稍候...', 0);
+                        // console.log(data);
+                        var ids = [];
+                        $.each(data,function (index,obj) {
+                            ids.push(obj.id);
+                        })
+                        if(ids.indexOf(1)!==-1){
+                            layer.msg("超级管理员不能删除");
+                            layer.close(MASK);
+                            return;
+                        }
+                        $.ajax({
+                            url:"/role/delete",
+                            dataType:"json",
+                            data:{"roleIds":ids.join(",")},
+                            type:"DELETE",//请求方式,
+                            success:function(data){
+                                if(data.status.statusCode===200){
+                                    window.location.reload();
+                                }else{
+                                    layer.close(MASK);
+                                    layer.msg('操作失败:'+data.status.message, {icon: 5});
+                                }
+                            },
+                            error:function(data){
+                                layer.close(MASK);
+                                layer.msg("删除角色失败,请检查");
+                            }
+                        });
+                    });
+                }
+            }
+        });
+    })
+</script>
+
+
+</body>
+</html>

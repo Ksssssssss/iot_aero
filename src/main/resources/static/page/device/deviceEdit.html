@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>添加服务器</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/layui/css/layui.css"  media="all">
+    <script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+
+<form class="layui-form" action="" lay-filter="example" style="margin-top: 20px;">
+    <div class="layui-form-item">
+        <label class="layui-form-label">名称</label>
+        <div class="layui-input-block">
+            <input type="text" id="sensorName" name="sensorName" lay-verify="title" autocomplete="off" placeholder="传感器名称" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">产品编号</label>
+        <div class="layui-input-inline">
+            <input type="text" id="serialNum" name="serialNum" placeholder="产品编号" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">离线时间</label>
+        <div class="layui-input-inline">
+            <input type="text" id="secondCheckTime" name="secondCheckTime" lay-verify="secondCheckTime" placeholder="离线时间" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">能力值</label>
+        <div class="layui-input-inline">
+            <select name="funcs" id="funcsSelect" lay-filter="funcsSelect">
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">初始值</label>
+        <div class="layui-input-block">
+            <textarea type="text" id="startValue" name="startValue" class="layui-textarea"></textarea>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <input type="text" id="id" name="id" style="display: none">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="deviceEditData">保存修改</button>
+        </div>
+    </div>
+</form>
+<script src="/layui/layui.js" charset="utf-8"></script>
+<script>
+    var rData;
+    var funcs = window.parent.funcs;
+
+
+    layui.use(['jquery','tree', 'util','form'], function(){
+        var form = layui.form
+            ,tree = layui.tree
+            ,layer = layui.layer
+            ,util = layui.util
+            ,$ = layui.jquery;
+
+        // $(function(){
+        //     $.ajax({
+        //         url: '/funcs/all',
+        //         method: 'GET',
+        //         async: false,
+        //         dataType: "json",
+        //         success: function (data, htmlData) {
+        //             var funcsSelect = $("#funcsSelect");
+        //             funcsSelect.empty();
+        //             funcsSelect.append(new Option("请选择能力"));
+        //             $.each(data.data, function (index, item) {
+        //                 if (funcs.indexOf(item.code)!==-1) {
+        //                     funcsSelect.append(new Option(item.desc, item.code, true));
+        //                 }else {
+        //                     funcsSelect.append(new Option(item.desc, item.code));
+        //                 }
+        //             });
+        //             form.render("select");
+        //         },
+        //         error: function (data) {
+        //             layer.msg("项目数据加载失败");
+        //         }
+        //     });
+        // });
+
+        //基本演示
+        var privilege_tree = tree.render({
+            elem: '#test12'
+            ,data: rData
+            ,showCheckbox: true //是否显示复选框
+            ,id: 'demoId1'
+            ,isJump: true //是否允许点击节点时弹出新窗口跳转
+            ,click: function(obj){
+                var data = obj.data; //获取当前点击的节点数据
+                layer.msg('状态：'+ obj.state + '<br>节点数据：' + JSON.stringify(data));
+            }
+        });
+
+        //按钮事件
+        util.event('lay-demo', {
+            getChecked: function(othis){
+                var checkedData = tree.getChecked('demoId1'); //获取选中节点的数据
+
+                layer.alert(JSON.stringify(checkedData), {shade:0});
+                console.log(checkedData);
+            }
+            ,setChecked: function(){
+                tree.setChecked('demoId1', [3, 5]); //勾选指定节点
+            }
+            ,reload: function(){
+                //重载实例
+                tree.reload('demoId1', {
+
+                });
+
+            }
+        });
+
+        //自定义验证规则
+        form.verify({
+            title: function(value){
+                if(value.length < 2){
+                    return '主机名称至少得2个字符啊';
+                }
+            },
+            content: function(value){
+                layedit.sync(editIndex);
+            },
+            ip: function(value, item){
+                function isValidIP(ip) {
+                    var reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/
+                    return reg.test(ip);
+                }
+                if(isValidIP(value) == false){
+                    return '请输入正确的IP地址';
+                }
+            }
+        });
+
+        //监听提交
+        form.on('submit(deviceEditData)', function(data){
+            var MASK = layer.load('正在处理数据,请稍候...', 0);
+            let field = data.field;
+            $.ajax({
+                url: "/device/edit",
+                type: 'POST',
+                data: JSON.stringify({
+                    "id": field.id,
+                    "sensorName": field.sensorName,
+                    "secondchecktime": field.secondCheckTime,
+                    "startvalue": field.startValue,
+                    "serialnum": field.serialNum,
+                    //目前能力值只支持单选 todo
+                    "funcs":"["+field.funcs+"]",
+                }),
+                dataType: "json", // 响应的数据类型
+                contentType: "application/json",
+                success: function (data) {
+                    var status = data.status;
+                    if(status.statusCode===200){
+                        layer.close(layer.index);
+                        window.parent.location.reload();
+                    }else{
+                        layer.close(MASK);
+                        layer.msg('操作失败:'+status.message, {icon: 5});
+                    }
+                },
+                error: function (data) {
+                    layer.close(MASK);
+                    layer.msg("设备参数修改失败,请检查");
+                }
+            });
+            return false;
+        });
+
+    });
+
+</script>
+
+</body>
+</html>

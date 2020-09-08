@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>用户管理</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/layui/css/layui.css"  media="all">
+</head>
+<body>
+<div class="layui-fluid" style="margin-top:20px">
+    <div class="layui-card">
+        <form>
+            <div class="layui-form layui-card-header" style="border-bottom:none!important;">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">真实姓名</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="realName" id="realName" placeholder="模糊匹配" autocomplete="off" class="layui-input"/>
+                        </div>
+                    </div>
+
+                    <div class="layui-inline">
+                        <label class="layui-form-label">启用/禁用</label>
+                        <div class="layui-input-inline" style="width: 80px;">
+                            <select name="enable" id = "enable">
+                                <option value="">全部</option>
+                                <option value=true>启用</option>
+                                <option value=false>禁用</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="layui-inline">
+                        <label class="layui-form-label">角色名称</label>
+                        <div class="layui-input-inline">
+                            <select name="roleId" id = "roleIdSelect" lay-verify="required" lay-search="">
+                                <option value="">直接选择/搜索选择</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="layui-inline layui-text">
+                        <a class="layui-btn  layui-btn-sm" id="do_search">
+                            <i class="layui-icon">&#xe615;</i>
+                            查询
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <table class="layui-hide" id="test" lay-filter="test"></table>
+    </div>
+</div>
+
+
+<script type="text/html" id="headBar">
+    <a class="layui-btn layui-btn-xs" lay-event="add">添加
+        <i class="layui-icon layui-icon-addition"></i>
+    </a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="batchdel">批量删除
+        <i class="layui-icon layui-icon-subtraction"></i>
+    </a>
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="loginLog">日志</a>
+    {{# if (d.IS_ADMIN !="Y"){}}
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    {{#}}}
+</script>
+
+<!-- 定义是否主键的开关 -->
+<script id="switchTpl" type="text/html">
+    <!-- 这里的 checked 的状态是-->
+    <!--<input type="checkbox"  name = "enable" value = {{d.ENABLE}} lay-skin="switch" disabled lay-text="启用|禁用" lay-filter="enableFilt" {{ d.ENABLE == 'Y' ? 'checked' : '' }}>-->
+    <button class="layui-btn layui-btn-{{ d.enable == true ? 'normal' : 'disabled' }} layui-btn-xs">{{ d.enable == true ? '启用' : '禁用' }}</button>
+</script>
+
+
+<script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+<script src="/layui/layui.js" charset="utf-8"></script>
+
+<script>
+    layui.use(['table','form','layer'], function(){
+        var table = layui.table,
+            form = layui.form,
+            layer = layui.layer;
+
+        table.render({
+            elem: '#test'
+            // ,method: 'get'
+            // ,url:'/common/json/users.json'
+            ,method: 'POST'
+            ,url: '/user/query' //数据接口
+            ,contentType: 'application/json'
+            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,toolbar: "#headBar"
+            ,cols: [[
+                // {type:'numbers'}
+                {type:'checkbox', fixed: 'left'}
+                ,{field:'id', title: 'ID', sort: true,align:'center', width: 70}
+                ,{field:'realName', title: '真实姓名', sort: true,align:'center',width:120} //width 支持：数字、百分比和不填写。你还可以通过 minWidth 参数局部定义当前单元格的最小宽度，layui 2.2.1 新增
+                ,{field:'dingTalkUid', title: '钉钉Uid',align:'center'}
+                ,{field:'roleName', title: '角色名称',sort: true,align:'center'}
+                ,{field:'enable', title: '启用禁用',templet: '#switchTpl',align:'center',width:110, sort: true}
+                ,{field:'crtTime', title: '创建时间',align:'center', sort: true}
+                ,{field:'lastLoginTime', title: '最近一次登录时间',align:'center',sort: true}
+                ,{field:'right',title:'操作',align:'center', toolbar: '#barDemo'}
+            ]]
+            // ,toolbar: '#toolbarDemo'
+            ,page: true
+            , request: {
+                pageName:'pageIndex',
+                limitName: 'pageSize'
+            }
+        });
+
+        $.ajax({
+            // url:"/common/json/role.json", //请求的url地址
+            // dataType:"json", //返回格式为json
+            // contentType: "application/json",
+            // async:false,//请求是否异步，默认为异步，这也是ajax重要特性
+            // data:{"roleIds":roleId}, //参数值
+            // type:"GET",//请求方式,
+            method: 'POST'
+            ,url: '/role/query' //数据接口
+            ,data: '{}'
+            ,dataType:"json"
+            ,contentType: 'application/json',
+            success:function(data){
+                // console.log(data);
+                var sel = $('#roleIdSelect');
+                $.each(data.data, function (index, element) {
+                    sel.append(new Option(element.roleName,element.id));
+                });
+                form.render('select'); //刷新select选择框渲染
+            },
+            error:function (xhr, textStatus, errorThrown) {
+                layer.msg("状态:"+ xhr.status + ", error:" + errorThrown);
+            }
+        });
+
+        //监听工具条
+        table.on('tool(test)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'detail'){
+                layer.msg('ID：'+ data.id + ' 的查看操作');
+            } else if(obj.event === 'del'){
+                layer.confirm('确定要删除该用户吗？', function(index){
+                    // obj.del();
+                    var MASK = layer.load('正在处理数据,请稍候...', 0);
+                    var userId = data.id;
+                    $.ajax({
+                        url:"/user/delete",
+                        dataType:"json",
+                        data:{"userIds":userId},
+                        method:"DELETE",
+                        success:function(data){
+                            if(data.status.statusCode===200){
+                                window.location.reload();
+                            }else{
+                                layer.close(MASK);
+                                layer.msg('操作失败:'+result.resultMessage, {icon: 5});
+                            }
+                        },
+                        error:function(data){
+                            layer.close(MASK);
+                            layer.msg("删除用户失败,请检查");
+                        }
+                    });
+                });
+            } else if(obj.event === 'edit'){
+                // layer.alert('编辑行：<br>'+ JSON.stringify(data))
+                ADDDIV = layer.open({
+                    type: 2,
+                    maxmin: false,
+                    shift: 4,
+                    shadeClose: true,
+                    title: "编辑用户",
+                    shade: [0.8, "#ccc"],
+                    offset: 'auto',
+                    area: ["500px", "500px"],
+                    content: "userEdit.html",
+                    success: function(layero, index) {
+                        var body = layer.getChildFrame('body', index);
+                        body.contents().find("#id").val(data.id);
+                        body.contents().find("#realName").val(data.realName);
+                        body.contents().find("#dingNickName").val(data.dingNickName);
+                        body.contents().find("#dingTalkUid").val(data.dingTalkUid);
+                        body.contents().find("#phoneNumber").val(data.phoneNumber);
+                        body.contents().find("input[name='enable'][value="+data.enable+"]").prop("checked",true);
+                        var iframeWin = layero.find('iframe')[0].contentWindow;
+                        iframeWin.layui.form.render();
+                        var roleIdSelect = body.contents().find("#roleIdSelect");
+                        $.ajax({
+                            url: '/role/query',
+                            method: 'POST',
+                            data:'{}',
+                            async: false,
+                            dataType: "json",
+                            contentType: "application/json",
+                            success: function (result, htmlData) {
+                                roleIdSelect.empty();
+                                roleIdSelect.append(new Option("请选择角色"));
+                                $.each(result.data, function (index, item) {
+                                    if (item.id === data.roleId) {
+                                        //new Option("文本","值",true,true).后面两个true分别表示默认被选中和有效!
+                                        roleIdSelect.append(new Option(item.roleName, item.id, true, true));
+                                    }else {
+                                        roleIdSelect.append(new Option(item.roleName, item.id));
+                                    }
+                                });
+                                // 重新渲染子窗口select
+                                iframeWin.layui.form.render('select');
+                            },
+                            error: function (data) {
+                                layer.msg("项目数据加载失败");
+                            }
+                        });
+                    }
+                });
+            }else if(obj.event==='loginLog'){
+                // layer.msg('ID：'+ data.USER_ID + ' 的查看登录日志操作');
+                let title = "用户【"+data.REAL_NAME+"】的登录日志记录"
+                ADDDIV = layer.open({
+                    type: 2,
+                    maxmin: false,
+                    shift: 4,
+                    shadeClose: true,
+                    title: title,
+                    shade: [0.8, "#ccc"],
+                    offset: 'auto',
+                    area: ["550px", "550px"],
+                    content: "userLog.html?userId=" + data.id
+                });
+
+            }
+        });
+
+        table.on('toolbar(test)', function(obj) {
+            var data = obj.data;
+            if (obj.event === 'add') {
+                ADDDIV = layer.open({
+                    type: 2,
+                    maxmin: true,
+                    shift: 4,
+                    shadeClose: true,
+                    title: "添加用户",
+                    shade: [0.8, "#ccc"],
+                    // offset: 't',
+                    area: ["600px", "560px"],
+                    // content: "userAdd.html"
+                });
+            } else if (obj.event === 'batchdel') {
+                var checkStatus = table.checkStatus('test')
+                    ,data = checkStatus.data;
+                if(data.length<=0){
+                    layer.msg('请先勾选需要删除的数据!', {icon: 5});
+                }else {
+                    layer.confirm('确定要【批量删除】所勾选的用户吗？', function(index){
+                        var MASK = layer.load('正在处理数据,请稍候...', 0);
+                        // console.log(data);
+                        var ids = [];
+                        $.each(data,function (index,obj) {
+                            ids.push(obj.id);
+                        })
+                        $.ajax({
+                            url:"/user/delete",
+                            dataType:"json",
+                            data:{"userIds":ids.join(",")},
+                            type:"DELETE",
+                            success:function(data){
+                                if(data.status.statusCode===200){
+                                    window.location.reload();
+                                }else{
+                                    layer.close(MASK);
+                                    layer.msg('操作失败:'+data.status.message, {icon: 5});
+                                }
+                            },
+                            error:function(data){
+                                layer.close(MASK);
+                                layer.msg("删除用户失败,请检查");
+                            }
+                        });
+                    });
+                }
+            }
+        });
+
+
+        // 执行搜索，表格重载
+        $('#do_search').on('click', function () {
+            // 搜索条件
+            var realName = $('#realName').val();
+            var enable = $('#enable').val();
+            var roleId = $('#roleIdSelect').val();
+            table.reload('test', {
+                method: 'POST'
+                ,url: '/user/query' //数据接口
+                ,contentType: 'application/json'
+                , where: {
+                    realName: realName,
+                    enable: enable,
+                    roleId:roleId
+                }
+                , request: {
+                    pageName:'pageIndex',
+                    limitName: 'pageSize'
+                }
+            });
+        });
+
+        //回车事件
+        $('body').keydown(function (event) {
+            if (event.keyCode == "13") {
+                $("#do_search").click();
+            }
+        });
+
+    });
+
+</script>
+
+
+</body>
+</html>

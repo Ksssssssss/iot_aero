@@ -1,0 +1,17 @@
+{
+  "code": 0,
+  "msg": "",
+  "count": 5,
+  "data": [
+    {
+      "id": 1,
+      "realName": "罗涛",
+      "dingTalkUid": "ding565a251321756sace1321",
+      "dingNickName": "罗涛",
+      "roleName": "超级管理员",
+      "enable": true,
+      "crtTime": "2020-07-10 10:00:00",
+      "lastLoginTime": "2020-07-10 11:00:00"
+    }
+  ]
+}

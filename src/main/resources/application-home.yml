@@ -1,0 +1,60 @@
+server:
+  port: 9740
+
+
+spring:
+  mvc:
+    favicon:
+      enabled: true
+  datasource:
+    url: jdbc:sqlserver://127.0.0.1:1434;DatabaseName=HardwarePlatform
+    username: sa
+    password: 123456
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    filters:  stat,wall,log4j
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+    initialSize:  2
+    minIdle: 1
+    maxActive: 4
+    maxWait: 60000
+  data:
+    mongodb:
+      uri: mongodb://127.0.0.1:27017/DevOps
+      devops:
+        uri: mongodb://127.0.0.1:27017/DevOps
+      hardware:
+        uri: mongodb://127.0.0.1:27017/HardwareData
+
+    elasticsearch:
+      clusterName: elasticsearch
+      clusterNodes: 127.0.0.1:9300 # 程序连接es的端口号是9300
+  kafka:
+    bootstrap-servers: 127.0.0.1:9092
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.bchd.ops.entity.po
+
+app:
+  start:
+    timeOut: 120000
+
+monitor:
+  warning:
+    spec:
+      cpu: 0.95
+      memory: 0.95
+      kafka-lag: 10000
+    script:
+      path: D:\soft\scripts\dingRobotWarning.bat
+
+dingtalk:
+  appid: dingoa07iqeed43vmofobw
+  appSecret: jHhCdHxbFSTMXeW1iaB18yAITCFfLS6d29ebKnF3xTD-8fC7oa-ZZN0Wee0ybNwf
+  baseUrl: http://127.0.0.1:9740/login.html
+  encodeBaseUrl: http%3A%2F%2F127.0.0.1%3A9740%2Flogin.html
+
+
+
+logging:
+  config: classpath:log4j2-single.xml

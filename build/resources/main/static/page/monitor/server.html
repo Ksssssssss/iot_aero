@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>server monitor manager</title>
+    <!--favicon未能正常显示，还需查看原因-->
+    <link href="favicon.ico" rel="icon" type="image/x-icon"/>
+    <link rel="stylesheet" href="/layui/css/layui.css" media="all"/>
+    <script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <script type="text/javascript" src="/echarts/echarts.min.js"></script>
+</head>
+<body>
+    <div class="layui-tab">
+        <ul class="layui-tab-title">
+        </ul>
+        <div class="layui-tab-content">
+        </div>
+    </div>
+</body>
+
+<script>
+    //注意：选项卡 依赖 element 模块，否则无法进行功能性操作
+    layui.use('element', function () {
+        var element = layui.element;
+
+        $.get('/monitor/serverList',function(data){
+            for(var i=0;i<data.length;i++){
+                var list = data[i];
+                var hostName = "";
+                var hostId = 0;
+                for(var item in list) {
+                    var type = "";
+                    var title = "";
+                    var legend = "";
+                    var xName = "";
+                    var yName = "";
+                    var pidDatas = [];
+                    var nameDatas = [];
+                    var valueDatas = [];
+                    var dataList = JSON.parse(list[item]);
+                    if(item==="memory") {
+                        type = "Histogram";
+                        title = "进程占用内存";
+                        legend = "内存";
+                        xName = "进程id";
+                        yName = "单位：M";
+                        for (var key in dataList) {
+                            hostName = dataList[key].hostName;
+                            hostId = dataList[key].hostId;
+                            pidDatas.push(dataList[key].pid);
+                            nameDatas.push(dataList[key].name);
+                            valueDatas.push(dataList[key].memorySize);
+                        }
+                    }else if(item==="cpu"){
+                        type = "Histogram";
+                        title = "进程占用CPU";
+                        legend = "CPU";
+                        xName = "进程id";
+                        yName = "单位：%";
+                        for (var key in dataList) {
+                            hostName = dataList[key].hostName;
+                            hostId = dataList[key].hostId;
+                            pidDatas.push(dataList[key].pid);
+                            nameDatas.push(dataList[key].name);
+                            valueDatas.push(dataList[key].cpuPct);
+                        }
+                    }else if(item==="tcp"){
+                        type = "PieChart";
+                        hostName = dataList.hostName;
+                        hostId = dataList.hostId;
+                        nameDatas = ["已建立连接","等待连接","关闭连接","正在监听"];
+                        valueDatas.push({value:dataList.established,name:"已建立连接"});
+                        valueDatas.push({value:dataList.timeWait,name:"等待连接"});
+                        valueDatas.push({value:dataList.closeWait,name:"关闭连接"});
+                        valueDatas.push({value:dataList.listening,name:"正在监听"});
+                    }
+
+                    if($("#"+hostId+"_"+i).length == 0) $(".layui-tab-content").append("<div id=\""+hostId+"_"+i+"\" class=\"layui-tab-item layui-show\"></div>");
+                    $("#"+hostId+"_"+i).append("<div id=\""+hostId+"_"+item+"\" style=\"width: 800px;height:400px;float: left;\"></div>");
+                    var myChart = echarts.init(document.getElementById(hostId+"_"+item));
+                    if(type==="Histogram") {
+                        // 指定图表的配置项和数据
+                        var option = {
+                            title: {
+                                text: title
+                            },
+                            tooltip: {
+                                formatter: function (params, ticket, callback) {
+                                    return nameDatas[params.dataIndex] + "(" + params.name + ")" + ":" + params.value;
+                                }
+                            },
+                            legend: {
+                                data: [legend]
+                            },
+                            xAxis: {
+                                name: xName,
+                                axisLabel: {
+                                    interval: 0, //强制显示文字
+                                },
+                                data: pidDatas
+                            },
+                            yAxis: {
+                                name: yName
+                            },
+                            series: [{
+                                name: legend,
+                                type: 'bar',
+                                data: valueDatas
+                            }]
+                        };
+                        // 使用刚指定的配置项和数据显示图表。
+                        myChart.setOption(option);
+                    }else{
+                        var option = {
+                            title: {
+                                text: 'TCP连接情况',
+                                left: 'center'
+                            },
+                            tooltip: {
+                                trigger: 'item',
+                                formatter: '{a} <br/>{b} : {c} ({d}%)'
+                            },
+                            legend: {
+                                orient: 'vertical',
+                                left: 'left',
+                                data: nameDatas
+                            },
+                            series: [
+                                {
+                                    name: 'TCP连接情况',
+                                    type: 'pie',
+                                    radius: '55%',
+                                    center: ['50%', '60%'],
+                                    data: valueDatas,
+                                    emphasis: {
+                                        itemStyle: {
+                                            shadowBlur: 10,
+                                            shadowOffsetX: 0,
+                                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                        }
+                                    }
+                                }
+                            ]
+                        };
+                        // 使用刚指定的配置项和数据显示图表。
+                        myChart.setOption(option);
+                    }
+                }
+
+                //添加tab
+                $(".layui-tab-title").append("<li class=\"layui-this\">"+hostName+"</li>");
+            }
+        });
+    });
+</script>
+</html>

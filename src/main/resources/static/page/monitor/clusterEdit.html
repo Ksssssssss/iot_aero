@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>添加集群/节点</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/layui/css/layui.css"  media="all">
+</head>
+<body>
+
+<form class="layui-form" lay-filter="clusterInfo" style="margin-top: 20px;">
+
+    <div class="layui-form-item">
+        <label class="layui-form-label" id="titleLabel">节点名称</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id ="title" lay-verify="title"  name="title"/>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label" id="clusterTypeLabel">类型</label>
+        <div class="layui-input-inline">
+            <select name="clusterType" id = "clusterTypeSelect" lay-verify="clusterType">
+                <option value="">请选择</option>
+                <option value="1">集群</option>
+                <option value="2">节点</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item" id="parentIdItem">
+        <label class="layui-form-label">父节点</label>
+        <div class="layui-input-inline">
+            <select name="pid" id = "pidSelect" lay-verify="pid">
+                <option value="">请选择</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="layui-form-item" id="urlItem">
+        <label class="layui-form-label">节点地址</label>
+        <div class="layui-input-inline">
+            <input type="text" class="layui-input" id ="url" name="url"/>
+        </div>
+    </div>
+
+<!--    <div class="layui-form-item">-->
+<!--        <div class="layui-input-inline">-->
+<!--            <input type="hidden" id ="id" lay-verify="id"  name="id"/>-->
+<!--        </div>-->
+<!--    </div>-->
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="submit" class="layui-btn" lay-submit="" lay-filter="edit">保存修改</button>
+        </div>
+    </div>
+</form>
+</fieldset>
+<script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+<script src="/layui/layui.js" charset="utf-8"></script>
+<script type="text/javascript" src="/common/js/common.js"></script>
+<script>
+    var id = getUrlParam("id");
+    layui.use(['tree','util','form','layer','jquery'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,$ = layui.jquery;
+
+        $.ajax({
+            url:"/cluster/getAllCluster",
+            dataType:"json",
+            async:false,
+            type:"GET",
+            success:function(data){
+                var pidSelect = $("#pidSelect");
+                $.each(data.data, function (index, element) {
+                    pidSelect.append(new Option(element.title, element.id));
+                });
+                form.render('select'); //刷新select选择框渲染
+            },
+            error:function(data){
+                layer.msg(data);
+            }
+        });
+
+        //查询角色
+        $.ajax({
+            url:"/cluster/getById",
+            dataType:"json",
+            contentType: "application/json",
+            async:false,
+            data:{"id": id},
+            type:"GET",
+            success:function(data){
+                var entity = data.data;
+                if(data.status.statusCode===200){
+                    form.val('clusterInfo', {
+                        "id": entity.id
+                        ,"title": entity.title
+                        ,"url": entity.url
+                        ,"pid": entity.pid
+                        ,"clusterType": entity.clusterType
+                    });
+                }else{
+                    layer.msg('加载节点失败:'+data.status.message, {icon: 5});
+                }
+                form.render();
+            },
+            error:function(data){
+                layer.msg(data);
+            }
+        });
+
+
+        //监听提交
+        form.on('submit(edit)', function(data){
+            var MASK = layer.load('正在处理数据,请稍候...', 0);
+            let field = data.field;
+            field.id = id;
+            $.ajax({
+                url: "/cluster/edit",
+                type: 'POST',
+                data: JSON.stringify(field),
+                dataType: "json", // 响应的数据类型
+                contentType: "application/json",
+                success: function (data) {
+                    var result = data.data;
+                    var status = data.status;
+                    if(status.statusCode===200){
+                        layer.close(layer.index);
+                        window.parent.location.reload();
+                    }else{
+                        layer.close(MASK);
+                        layer.msg('操作失败:'+result.message, {icon: 5});
+                    }
+                },
+                error: function (data) {
+                    layer.close(MASK);
+                    layer.msg("修改集群节点失败,请检查");
+                }
+            });
+            return false;
+        });
+    });
+</script>
+
+</body>
+</html>

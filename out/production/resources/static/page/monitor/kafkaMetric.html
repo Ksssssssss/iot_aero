@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>KAFKA监控数据</title>
+    <link rel="stylesheet" href="/layui/css/layui.css" media="all"/>
+    <script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <script type="text/javascript" src="/echarts/echarts.min.js"></script>
+</head>
+<body>
+    <form class="layui-form" id="searchForm" action="">
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">消费组</label>
+                <div class="layui-input-block">
+                    <select name="consumerGroup" id="consumerGroupSelect" lay-filter="consumerGroup">
+                        <option value="logstash" selected="selected">logstash</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">Topic</label>
+                <div class="layui-input-block">
+                    <select name="topic" id="topicSelect" lay-filter="topic">
+                        <option value="" selected="selected">请选择</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">分区</label>
+                <div class="layui-input-inline">
+                    <select name="partition" id="partitionSelect" lay-filter="partition">
+                        <option value="" selected="selected">请选择</option>
+                        <option value="0" >0</option>
+                        <option value="1" >1</option>
+                        <option value="2" >2</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">时间范围</label>
+                <div class="layui-input-inline">
+                    <select name="hourRange" id="hourRangeSelect" lay-filter="hourRange">
+                        <option value="1" selected="selected">1小时</option>
+                        <option value="4" >4小时</option>
+                        <option value="24" >24小时</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+    <div id="kafka" style="width: 100%;height:400px;"></div>
+</body>
+<script>
+    layui.use(['jquery','layer', 'form'],function() {
+        var $ = layui.$,
+            form = layui.form,
+            layer = layui.layer;
+        var kafkaChart;
+
+        $(function () {
+            $.ajax({
+                url: "/kafkaMetric/getAllConsumerGroup",
+                dataType: "json",
+                async: false,
+                type: "GET",
+                success: function (data) {
+                    var consumerGroupSelect = $("#consumerGroupSelect");
+                    consumerGroupSelect.empty();
+                    $.each(data.data, function (index, element) {
+                        if (index === 0) {
+                            consumerGroupSelect.append(new Option(element, element, true, true));
+                        } else {
+                            consumerGroupSelect.append(new Option(element, element));
+                        }
+                    });
+                    form.render('select');
+                },
+                error: function (data) {
+                    layer.msg(data);
+                }
+            });
+
+            $.ajax({
+                url: "/kafkaMetric/getAllTopics",
+                dataType: "json",
+                async: false,
+                type: "GET",
+                success: function (data) {
+                    var topicSelect = $("#topicSelect");
+                    topicSelect.empty();
+                    topicSelect.append(new Option("请选择",""));
+                    $.each(data.data, function (index, element) {
+                        topicSelect.append(new Option(element, element));
+                    });
+                    form.render('select');
+                },
+                error: function (data) {
+                    layer.msg(data);
+                }
+            });
+
+
+            kafkaChart = echarts.init(document.getElementById('kafka'));
+
+            renderKafkaChart(kafkaChart, false);
+
+            setInterval(function (){
+                renderKafkaChart(kafkaChart,false);
+            }, 30000);
+        });
+
+        function renderKafkaChart(chart, needClear) {
+            $.ajax({
+                url: "/kafkaMetric/chartData",
+                type: 'POST',
+                data: buildQuery(),
+                dataType: "json",
+                contentType: "application/json",
+                success: function (result) {
+                    var multiChart = result.data;
+                    var status = result.status;
+                    if(status.statusCode===200) {
+                        var option = buildOption('Kafka积压数据', multiChart.legend, multiChart.chartMap);
+                        if (needClear) {
+                            chart.clear();
+                        }
+                        chart.setOption(option);
+                    }
+                }
+            });
+        }
+
+        function buildOption(title, legend, multiMap){
+            var newData = [];
+            for(let item in multiMap) {
+                const lineItem = new serLineItem();
+                lineItem.name = item;
+                lineItem.data = multiMap[item];
+                newData.push(lineItem);
+            }
+            option = {
+                title: {
+                    left:'center',
+                    text: title
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        animation: false
+                    }
+                },
+                legend: {
+                    top:"6%",
+                    data: legend
+                },
+                xAxis: {
+                    type: 'time',
+                    minInterval: 5 * 60 * 1000,
+                    maxInterval: 4 * 60 * 60 * 1000,
+                    splitLine: {
+                        show: false
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    boundaryGap: [0, '100%'],
+                    axisLabel: {
+                        show: true,
+                        interval: 'auto'
+                    },
+                    splitLine: {
+                        show: false
+                    }
+                },
+                series: newData
+            };
+            return option;
+        }
+
+        form.on("select", function () {
+            renderKafkaChart(kafkaChart,true);
+        });
+
+            // $.ajax({
+            //     url: "/kafkaMetric/kafka",
+            //     data: buildQuery(),
+            //     type: 'POST',
+            //     dataType: "json",
+            //     contentType: "application/json",
+            //     success: function (result) {
+            //         var metricList = result.data;
+            //         var status = result.status;
+            //         if (status.statusCode === 200) {
+            //             var option = buildOption('kafka积压数据', metricList);
+            //             kafkaChart.setOption(option);
+            //         }
+            //     }
+            // });
+            //
+            //
+            // function buildOption(title, metricList) {
+            //     var newData = [];
+            //     var legendData = [];
+            //     metricList.forEach(function(item){
+            //         const lineItem = new serLineItem();
+            //         var legendName = item.topic + "-" + item.partition ;
+            //         lineItem.name = legendName;
+            //         if (legendData.indexOf(legendName)===-1) {
+            //             legendData.push(legendName);
+            //             lineItem.data = [];
+            //             metricList.forEach(function(innerItem) {
+            //                 var recordSign = innerItem.topic + "-" + innerItem.partition ;
+            //                 if (recordSign === legendName) {
+            //                     var singleRecord = [innerItem.lastMetricTime, innerItem.lag];
+            //                     lineItem.data.push(singleRecord);
+            //                 }
+            //             });
+            //             newData.push(lineItem);
+            //         }
+            //     });
+            //
+            //     option = {
+            //         title: {
+            //             text: title
+            //         },
+            //         tooltip: {
+            //             trigger: 'axis',
+            //             axisPointer: {
+            //                 animation: false
+            //             }
+            //         },
+            //         legend: {
+            //             data: legendData
+            //         },
+            //         xAxis: {
+            //             type: 'time',
+            //             minInterval: 5 * 60 * 1000,
+            //             maxInterval: 4 * 60 * 60 * 1000,
+            //             splitLine: {
+            //                 show: false
+            //             }
+            //         },
+            //         yAxis: {
+            //             type: 'value',
+            //             boundaryGap: [0, '100%'],
+            //             axisLabel: {
+            //                 show: true,
+            //                 interval: 'auto'
+            //             },
+            //             splitLine: {
+            //                 show: false
+            //             }
+            //         },
+            //         series: newData
+            //     };
+            //     return option;
+            // }
+
+            var serLineItem = function () {
+                return {
+                    name: '',
+                    data: [],
+                    type: 'line',
+                    smooth: true,
+                    showSymbol: false,
+                    hoverAnimation: false,
+                    lineStyle:{
+                        width:1
+                    }
+                }
+            };
+
+            function buildQuery(){
+                var query = {
+                    "consumerGroup": $("#consumerGroupSelect").val(),
+                    "topic": $("#topicSelect").val(),
+                    "partition": $("#partitionSelect").val(),
+                    "rangeHours": $("#hourRangeSelect").val()
+                };
+                return JSON.stringify(query);
+            }
+        })
+</script>
+</html>

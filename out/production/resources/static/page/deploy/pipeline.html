@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>service deploy</title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="format-detection" content="telephone=no">
+        <link rel="stylesheet" href="/layui-multi/css/layui.multiple.css" media="all"/>
+        <link rel="stylesheet" href="/layui-multi/css/layui.css" media="all"/>
+        <style>
+            .layui-anim {
+                width: 97px;
+                height: 97px;
+                line-height: 97px;
+                text-align: center;
+                margin: 0 auto 10px;
+                cursor: pointer;
+                color: #009688;
+                border-radius: 50%;
+                border: 3px solid #009688;
+            }
+
+            .deploy-complete {
+                width: 100px;
+                height: 100px;
+                line-height: 100px;
+                text-align: center;
+                margin: 0 auto 10px;
+                background-color: #009688;
+                cursor: pointer;
+                color: #fff;
+                border-radius: 50%;
+            }
+
+            .deploy-fail {
+                width: 100px;
+                height: 100px;
+                line-height: 100px;
+                text-align: center;
+                margin: 0 auto 10px;
+                background-color: #F73809;
+                cursor: pointer;
+                color: #fff;
+                border-radius: 50%;
+                border: 3px solid #F73809;
+            }
+
+            .code{
+                text-align: center;
+            }
+
+            .sign{
+                width: 80px;
+                height: 30px;
+                line-height: 30px;
+                text-align: center;
+                margin: 37px 70px;
+                border: 2px solid #009688;
+                border-radius: 5px;
+            }
+
+            .linuxScreen{
+                width: 100%;
+                background: #2F4056;
+                position: absolute;
+                bottom: 0;
+                top: 250px;
+                font-size: 12px;
+                color: wheat;
+                overflow-y:scroll;
+                overflow-x:hidden;
+                table-layout: fixed;
+                word-wrap:break-word;
+                word-break:break-all;
+            }
+
+            .linuxScreen::-webkit-scrollbar {
+                display: none;/*隐藏滚动条*/
+            }
+
+            .layui-form-select dl {
+                overflow-y: auto!important;
+                max-height:300px!important;
+            }
+
+        </style>
+    </head>
+    <body>
+<!--    <fieldset class="layui-elem-field layui-field-title" style="margin-top:30px;">-->
+<!--        <legend id="headTitle"></legend>-->
+<!--    </fieldset>-->
+    <form class="layui-form layui-form-pane" action="" lay-filter="deployInfo" style="margin: 15px 0px">
+        <div class="layui-form-item">
+            <label class="layui-form-label">流水线</label>
+            <div class="layui-input-inline">
+                <select name="projectName" id="projectSelect" lay-filter="projectSelect">
+<!--                    <option value="">选择项目</option>-->
+                </select>
+            </div>
+            <div class="layui-input-inline">
+                <select name="branch" id="branchSelect" lay-filter="branchSelect">
+<!--                    <option value="">选择分支</option>-->
+                </select>
+            </div>
+            <div class="layui-input-inline">
+                <select name="servers" id="serverSelect" multiple lay-search>
+<!--                    <option value="">选择服务器</option>-->
+                </select>
+            </div>
+        </div>
+    </form>
+    <ul class="layui-row layui-col-space10 site-doc-icon site-doc-anim">
+        <li class="layui-col-md2">
+            <div class="sign sign-start layui-row">开始</div>
+        </li>
+        <li class="layui-col-md2">
+<!--            <div class="code layui-row">拉取代码</div>-->
+            <div class="layui-anim layui-row deploy-pipeline" data-anim="layui-anim-rotate layui-anim-loop deploy-this" id="downloading" order = 1>拉取代码</div>
+        </li>
+        <li class="layui-col-md2">
+<!--            <div class="code layui-row">代码编译</div>-->
+            <div class="layui-anim layui-row deploy-pipeline" data-anim="layui-anim-rotate layui-anim-loop deploy-this" id="compiling" order = 2>代码编译</div>
+        </li>
+        <li class="layui-col-md2">
+<!--            <div class="code layui-row">项目构建</div>-->
+            <div class="layui-anim layui-row deploy-pipeline" data-anim="layui-anim-rotate layui-anim-loop deploy-this" id="packaging" order = 3>项目构建</div>
+        </li>
+        <li class="layui-col-md2">
+<!--            <div class="code layui-row">部署</div>-->
+            <div class="layui-anim layui-row deploy-pipeline" data-anim="layui-anim-rotate layui-anim-loop deploy-this" id="deploying" order = 4>部署</div>
+        </li>
+        <li class="layui-col-md2">
+            <div class="sign layui-row sign-end">结束</div>
+        </li>
+    </ul>
+
+    <fieldset class="layui-elem-field layui-field-title" style="margin-top:30px;">
+        <legend id="log">部署日志</legend>
+    </fieldset>
+    <div id="deployLogScreen" class="linuxScreen">
+        <span id="notReady">====流水线还未启动====</span>
+    </div>
+    <script src="/sockjs-client/sockjs.min.js"></script>
+    <script type="text/javascript" src="/layui-multi/layui.js"></script>
+    <script type="text/javascript">
+        var socket;
+        var currentOrder = 0;
+        var deploySize = 0;
+        var deploySuccess = 0;
+
+        layui.use(['jquery','form', 'layer'], function () {
+            var $ = layui.jquery;
+            var form = layui.form;
+            var layer = layui.layer;
+
+
+            $(function () {
+                $.ajax({
+                    url: '/codeLib/all',
+                    method: 'GET',
+                    // data: params,
+                    async: false,
+                    dataType: "json",
+                    success: function (data,htmlData) {
+                        localStorage.setItem("codes", JSON.stringify(data.data));
+                        $("#projectSelect").empty();
+                        $("#projectSelect").append(new Option("选择项目", ""));
+                        $.each(data.data, function(index, item) {
+                            $('#projectSelect').append(new Option(item.projectName));
+                        });
+                        form.render("select");
+                    },
+                    error: function (data) {
+                        layer.msg("项目数据加载失败");
+                    }
+
+                });
+
+
+                $.ajax({
+                    url: '/server/all',
+                    method: 'GET',
+                    async: false,
+                    dataType: "json",
+                    success: function (data,htmlData) {
+                        localStorage.setItem("servers", JSON.stringify(data.data));
+                        $("#serverSelect").empty();
+                        $("#serverSelect").append(new Option("选择服务器", ""));
+                        $.each(data.data, function(index, item) {
+                            $('#serverSelect').append(new Option(item.lanIp));
+                        });
+                        form.render("select");
+                    },
+                    error: function (data) {
+                        layer.msg("服务器数据加载失败");
+                    }
+                });
+
+                var projectName = localStorage.getItem("project");
+                if (projectName != null && projectName != "undefined") {
+                    $("#projectSelect").children().each(function (elem) {
+                        if ($(this).val() === projectName) {
+                            $(this).attr("selected","selected");
+                        }
+                    });
+                    form.render();
+                    fillBranches(projectName);
+                }
+            });
+
+
+
+            form.on("select(projectSelect)", function (data) {
+                fillBranches(data.value);
+            });
+
+
+            function fillBranches(projectName){
+                $.ajax({
+                    // url: '/common/json/branch.json',
+                    url:'/codeLib/getBranches?projectName='+projectName,
+                    method: 'GET',
+                    async: false,
+                    dataType: "json",
+                    success: function (data,htmlData) {
+                        if (data.status.statusCode===200) {
+                            $("#branchSelect").empty();
+                            $("#branchSelect").append(new Option("选择分支", ""));
+                            // $.each(data.data, function(index, item) {
+                            //     $('#branchSelect').append(new Option(item.branch));
+                            // });
+                            $.each(data.data, function (index, item) {
+                                $('#branchSelect').append(new Option(item));
+                            });
+                            form.render("select");
+                        }
+                    },
+                    error: function (data) {
+                        layer.msg("分支数据加载失败");
+                    }
+                });
+            }
+
+
+            //演示动画开始
+            //可以在这里修改触发动画的事件
+            // $('.layui-anim').click(function(){
+            //     var othis = $(this), anim = othis.data('anim');
+            //
+            //     //停止循环
+            //     if(othis.hasClass('layui-anim-loop')){
+            //         return othis.removeClass(anim);
+            //     }
+            //     othis.removeClass(anim);
+            //     setTimeout(function(){
+            //         othis.addClass(anim);
+            //     });
+            // });
+
+            $(".sign-start").click(function () {
+                socketInit();
+                $("#notReady").remove();
+            })
+
+
+
+            $('.deploy-pipeline').click(function(){
+                var othis = $(this), anim = othis.data('anim');
+                //停止循环
+                if(othis.hasClass('layui-anim-loop')){
+                    return othis.removeClass(anim);
+                }
+
+                var order = $(this).attr("order");
+                currentOrder = order;
+                var preOrder = parseInt(order) - 1;
+                if(preOrder>0){
+                    var prevDeployComplete = $(".deploy-pipeline[order=" + preOrder + "]").hasClass("deploy-complete");
+                    if(!prevDeployComplete){
+                        return layer.msg("请先完成前一步骤");
+                    }
+                }else {
+                    if (!(socket !=null && socket != "undefined" && socket.readyState == WebSocket.OPEN)) {
+                        $("#notReady").remove();
+                        return socketInit();
+                    }
+                }
+
+                // var projectName = localStorage.getItem("project");
+                // var codeLibrary = localStorage.getItem("codeLibrary");
+                // var compiler = localStorage.getItem("compiler");
+                if(projectName==null||projectName==''){
+                    projectName = $("#projectSelect").val();
+                }
+
+                var compiler = localStorage.getItem("compiler");
+                var projectName = $("#projectSelect").val();
+
+
+                if(projectName==null||projectName==''){
+                    layer.msg("请先选择要部署的项目");
+                    return ;
+                }
+                var codeLibrary = getCodeLibrary(projectName);
+                var branch = $("#branchSelect").val();
+                if(branch==null||branch==''){
+                    layer.msg("请先选择要部署的分支");
+                    return ;
+                }
+
+                var cmdPrefix = $(this).attr("id");
+                var machineIps = $("#serverSelect").val();
+                if(machineIps==null||machineIps==''){
+                    layer.msg("请先选择要部署的服务器");
+                    return ;
+                }
+                var machineArry = new Array();
+                var serversJsonStr = localStorage.getItem("servers");
+                var servers = JSON.parse(serversJsonStr);
+                $.each(servers,function(index, item) {
+                    if (machineIps.indexOf(item.lanIp)!==-1) {
+                        machineArry.push(item);
+                    }
+                });
+
+                // $.ajax({
+                //     url: '/common/json/servers.json',
+                //     method: 'GET',
+                //     async: false,
+                //     dataType: "json",
+                //     success: function (data,htmlData) {
+                //         $.each(data.data, function(index, item) {
+                //             if (machineIps.indexOf(item.lanIp)!==-1) {
+                //                 machineArry.push(item);
+                //             }
+                //         });
+                //     },
+                //     error: function (data) {
+                //         layer.msg("分支数据加载失败");
+                //     }
+                // });
+
+                var deployData = {
+                    projectName:projectName,
+                    codeLibrary:codeLibrary,
+                    branch:branch,
+                    compiler:compiler,
+                    machines:machineArry
+                };
+                deploySize = machineArry.length;
+                var deployDataStr = JSON.stringify(deployData);
+                var tips = "===============   " + cmdPrefix + "   ===============<br>";
+                if(cmdPrefix != "downloading"){
+                    tips = "<br><br>" + tips;
+                }
+                showRecvMsg(tips);
+                // var cmd = cmdPrefix + "|" + projectName + "|" + codeLibrary + "|" + branch;
+                var cmd = cmdPrefix + "*" + deployDataStr;
+                //执行动画样式
+                othis.removeClass(anim);
+                setTimeout(function(){
+                    othis.addClass(anim);
+                });
+                send(cmd)
+            })
+
+            function socketInit() {
+                socket = new SockJS("/deploy");
+                socket.onmessage = function (ev) {
+                    var msg = ev.data;
+                    showRecvMsg(msg);
+                    var successTip = "seconds (JVM running for ";
+                    //上一步执行成功后，触发一下一任务
+                    if(msg.startsWith("##SUCCESS##:")){
+                        var deployElement = $(".deploy-this");
+                        deployElement.removeClass("layui-anim-loop");
+                        deployElement.removeClass("deploy-this");
+                        deployElement.addClass("deploy-complete");
+                        var order = deployElement.attr("order");
+                        var nextOrder = parseInt(order) + 1;
+                        if (order<4) {
+                            $(".deploy-pipeline[order=" + nextOrder + "]").click();
+                        }
+                    }else if(msg.substr(0,5) === "<span"){
+                        var deployElement = $(".deploy-pipeline[order=" + currentOrder + "]");
+                        deployElement.addClass("deploy-fail");
+                        deployElement.css("borderColor","#F73809");
+                        $(".sign-end").text("部署失败");
+                    }else if(msg.indexOf(successTip)!=-1){
+                        //包含项目启动成功的提示，并且时间不能超过太长，有可能是之前的启动日志
+                        var maybeTime = msg.split("|")[0];
+                        if(maybeTime.indexOf("-")==-1 || maybeTime.indexOf(":")==-1 || maybeTime.indexOf(" ")==-1|| maybeTime.indexOf(",")==-1 || maybeTime.length<19){
+                            return;
+                        }
+                        maybeTime = maybeTime.substring(0,19);
+                        maybeTime = maybeTime.replace(/-/g,'/');
+                        var timestamp = new Date(maybeTime).getTime();
+                        var now = parseInt(new Date().getTime());
+                        var offset = now - timestamp;
+                        if(offset>5000){
+                            //可能是上一次启动成功的日志
+                            return;
+                        }
+                        $(".deploy-pipeline[order=" + currentOrder + "]").removeClass("layui-anim-loop");
+                        $(".deploy-pipeline[order=" + currentOrder + "]").addClass("deploy-complete");
+                        deploySuccess++;
+                        $(".sign-end").text("部署成功" + deploySuccess + "/" + deploySize);
+                    }
+
+                }
+                socket.onopen = function (ev) {
+                    $("#downloading").click();
+                }
+                socket.onclose = function (ev) {
+                    $(".deploy-pipeline[order=" + currentOrder + "]").removeClass("layui-anim-loop");
+                    showRecvMsg("<br>部署日志socket连接被断开");
+                }
+            }
+
+            function getCodeLibrary(projectName) {
+                var codesJsonStr = localStorage.getItem("codes");
+                var codes = JSON.parse(codesJsonStr);
+                var url;
+                $.each(codes,function(index, item) {
+                    if (item.projectName===projectName) {
+                        url = item.url;
+                    }
+                });
+                return url;
+            }
+
+
+            function send(text) {
+                if(!window.WebSocket){
+                    return
+                }
+                if(socket.readyState == WebSocket.OPEN){
+                    socket.send(text);
+                }else{
+                    layer.msg("部署日志socket连接尚未开启");
+                }
+            }
+
+            function showRecvMsg(msg) {
+                if(deployLogScreen.innerHTML!=null){
+                    deployLogScreen.innerHTML +=  "<br>";
+                }
+                deployLogScreen.innerHTML += msg;
+                deployLogScreen.scrollTop = deployLogScreen.scrollHeight;
+            }
+
+        })
+
+
+
+
+    </script>
+    </body>
+</html>

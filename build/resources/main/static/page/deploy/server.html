@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>server manage</title>
+    <link href="favicon.ico" rel="icon" type="image/x-icon" />
+    <link rel="stylesheet" href="/layui/css/layui.css" media="all"/>
+    <script type="text/javascript" src="/jquery/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="/layui/layui.js"></script>
+    <style>
+        body{
+            margin: 10px;
+        }
+        .demo-carousel{
+            height: 200px;
+            line-height: 200px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<table class="layui-hide" id="serverList" lay-filter="serverList"></table>
+<script type="text/html" id="pipelineBar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs jump_refresh_url" lay-event="pipeline" href="/page/deploy/pipeline.html">进入流水线</a>
+</script>
+<script type="text/javascript">
+    layui.use(['laydate', 'laypage', 'layer', 'table'], function(){
+        var laydate = layui.laydate //日期
+            ,laypage = layui.laypage //分页
+            ,layer = layui.layer //弹层
+            ,table = layui.table //表格
+
+
+        //执行一个 table 实例
+        table.render({
+            elem: '#serverList'
+            ,method: 'POST'	//请求方法，默认为 GET
+            ,url: '/server/list' //数据接口
+            ,contentType: 'application/json'
+            // ,where : {
+            // mac: $("#mac").val(),
+            // sensorName: $("#sensorName").val(),
+            // status: $("#status").val(),
+            // sensorType: $("#sensorType").val()
+            // }
+            ,request:{
+                pageName:'pageIndex',
+                limitName: 'pageSize'
+            }
+            ,title: '服务器列表'
+            ,page: true //开启分页
+            ,limit: 10 //每页默认展示多少条数据, 默认是10条
+            ,defaultToolbar: ['filter','exports']
+            ,toolbar: 'default' //开启工具栏，此处显示默认图标，可以自定义模板，详见文档
+            ,totalRow: false //开启合计行
+            ,cols: [[ //表头
+                {type: 'checkbox', fixed: 'left'}
+                // ,{field: 'id', title: 'ID', width:300, sort: true, fixed: 'left'}
+                ,{field: 'serverName', title: '名称', width:200,fixed: 'left'}
+                ,{field: 'lanIp', title: '内网IP', width:150,fixed: 'left'}
+                ,{field: 'wlanIp', title: '外网IP', width:150,fixed: 'left'}
+                ,{field: 'os', title: '系统', width:100}
+                ,{field: 'userName', title: '用户名', width:100}
+                ,{field: 'codeBasePath', title: '代码路径', width: 300}
+                ,{field: 'deployBasePath', title: '部署路径', width:300}
+                ,{field: 'deploySharePath', title: '共享部署路径', width:300}
+
+            ]]
+            ,id: 'tableLoad'
+        });
+
+        //监听头工具栏事件 用toobar
+        table.on('toolbar(serverList)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id)
+                ,data = checkStatus.data; //获取选中的数据
+            switch(obj.event){
+                case 'add':
+                    ADDDIV = layer.open({
+                        type: 2,
+                        maxmin: false,
+                        shift: 4,
+                        shadeClose: true,
+                        title: "添加服务器",
+                        shade: [0.8, "#ccc"],
+                        offset: 'auto',
+                        area: ['600px','600px'],
+                        content: "serverAdd.html"
+                    });
+                    break;
+                case 'update':
+                    if(data.length === 0){
+                        layer.msg('请选择一行');
+                    } else if(data.length > 1){
+                        layer.msg('只能同时编辑一个');
+                    } else {
+                        layer.alert('编辑 [id]：'+ checkStatus.data[0].id);
+                    }
+                    break;
+                case 'delete':
+                    if(data.length === 0){
+                        layer.msg('请选择一行');
+                    } else {
+                        layer.msg('删除');
+                    }
+                    break;
+            };
+        });
+
+        //分页
+        laypage.render({
+            elem: 'pageDemo' //分页容器的id
+            ,count: 100 //总页数
+            ,skin: '#1E9FFF' //自定义选中色值
+            //,skip: true //开启跳页
+            ,jump: function(obj, first){
+                if(!first){
+                    layer.msg('第'+ obj.curr +'页', {offset: 'b'});
+                }
+            }
+        });
+
+    });
+</script>
+</body>
+</html>
